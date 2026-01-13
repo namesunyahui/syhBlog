@@ -166,6 +166,37 @@ syhBlog/
 - **标签表**：id, name
 - **评论表**：id, article_id, nickname, email, content, ip_address, user_agent
 
+## 环境配置
+
+项目使用环境变量来管理敏感配置（数据库密码、JWT密钥等）。
+
+1. 复制环境变量模板文件：
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+
+2. 根据实际情况修改 `backend/.env` 文件中的配置：
+   ```properties
+   # Database Configuration
+   DB_URL=jdbc:postgresql://localhost:5432/syh_blog
+   DB_USERNAME=syh
+   DB_PASSWORD=your_password
+
+   # JWT Configuration
+   JWT_SECRET=your_jwt_secret_key
+
+   # Druid Monitor
+   DRUID_USERNAME=admin
+   DRUID_PASSWORD=your_druid_password
+
+   # Redis (optional)
+   REDIS_HOST=localhost
+   REDIS_PORT=6379
+   REDIS_PASSWORD=
+   ```
+
+3. **重要**：不要将 `.env` 文件提交到 Git 仓库（已添加到 `.gitignore`）
+
 ## 快速开始
 
 ### 环境要求

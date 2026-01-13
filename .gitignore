@@ -1,0 +1,33 @@
+# Claude Code files
+.claude/
+CLAUDE.md
+ARTICLE_MANAGEMENT.md
+ROADMAP.md
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Backend (Spring Boot/Maven)
+backend/target/
+*.class
+*.jar
+*.war
+
+# Frontend (Node.js/Vue)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Environment files
+.env
+backend/.env
+
+# Other
+nul
