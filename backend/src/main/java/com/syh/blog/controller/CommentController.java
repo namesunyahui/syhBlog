@@ -36,8 +36,7 @@ public class CommentController {
             wrapper.eq(Comment::getArticleId, articleId);
         }
 
-        wrapper.eq(Comment::getIsApproved, true)
-               .orderByDesc(Comment::getCreatedAt);
+        wrapper.orderByDesc(Comment::getCreatedAt);
 
         Page<Comment> commentPage = commentService.page(pageParam, wrapper);
         return Result.success(commentPage);
@@ -46,7 +45,7 @@ public class CommentController {
     @Operation(summary = "提交评论")
     @PostMapping
     public Result<String> submit(@RequestBody Comment comment) {
-        comment.setIsApproved(false); // 默认需要审核
+        //comment.setIsApproved(false); // 默认需要审核
         boolean success = commentService.save(comment);
         return success ? Result.success("评论提交成功，等待审核") : Result.error("评论提交失败");
     }

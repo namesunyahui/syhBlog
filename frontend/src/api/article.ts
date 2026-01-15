@@ -29,25 +29,25 @@ export const searchArticles = (keyword: string) => {
 
 // 获取所有文章（包括草稿）
 export const getAdminArticles = (params: any) => {
-  return request.get('/admin/articles', { params })
+  return request.get('/articles/all', { params })
 }
 
 // 创建文章
 export const createArticle = (data: any) => {
-  return request.post('/admin/articles', data)
+  return request.post('/articles', data)
 }
 
 // 更新文章
 export const updateArticle = (id: number, data: any) => {
-  return request.put(`/admin/articles/${id}`, data)
+  return request.put(`/articles/${id}`, data)
 }
 
 // 删除文章
 export const deleteArticle = (id: number) => {
-  return request.delete(`/admin/articles/${id}`)
+  return request.delete(`/articles/${id}`)
 }
 
 // 发布/撤回文章
 export const publishArticle = (id: number, publish: boolean) => {
-  return request.put(`/admin/articles/${id}/publish`, { publish })
+  return request.put(`/articles/${id}/publish`, { publish })
 }

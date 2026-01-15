@@ -73,4 +73,60 @@ public class ArticleController {
         IPage<Article> articlePage = articleService.getArchiveList(pageParam);
         return Result.success(articlePage);
     }
+
+    // ==================== 管理后台接口 ====================
+
+    @Operation(summary = "获取所有文章（包括草稿）")
+    @GetMapping("/all")
+    public Result<IPage<Article>> getAllArticles(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        Page<Article> pageParam = new Page<>(page, size);
+        IPage<Article> articlePage = articleService.getAllArticles(pageParam);
+        return Result.success(articlePage);
+    }
+
+    @Operation(summary = "创建文章")
+    @PostMapping
+    public Result<Article> createArticle(@RequestBody Article article) {
+        Article saved = articleService.createArticle(article);
+        return Result.success(saved);
+    }
+
+    @Operation(summary = "更新文章")
+    @PutMapping("/{id}")
+    public Result<Article> updateArticle(@PathVariable Long id, @RequestBody Article article) {
+        article.setId(id);
+        Article updated = articleService.updateArticle(article);
+        return Result.success(updated);
+    }
+
+    @Operation(summary = "删除文章")
+    @DeleteMapping("/{id}")
+    public Result<Void> deleteArticle(@PathVariable Long id) {
+        articleService.deleteArticle(id);
+        return Result.success();
+    }
+
+    @Operation(summary = "发布/撤回文章")
+    @PutMapping("/{id}/publish")
+    public Result<Void> publishArticle(@PathVariable Long id, @RequestBody PublishRequest request) {
+        articleService.publishArticle(id, request.getPublish());
+        return Result.success();
+    }
+
+    /**
+     * 发布请求DTO
+     */
+    public static class PublishRequest {
+        private Boolean publish;
+
+        public Boolean getPublish() {
+            return publish;
+        }
+
+        public void setPublish(Boolean publish) {
+            this.publish = publish;
+        }
+    }
 }
