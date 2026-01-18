@@ -15,12 +15,10 @@ import org.springframework.context.annotation.Configuration;
  * @author sunyahui
  * @since 2024-01-01
  */
-// Temporarily disabled to test compatibility
-//@Configuration
-//@AutoConfigurationPackage
+@Configuration
+@AutoConfigurationPackage
 public class MyBatisPlusConfig {
 
-    /*
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
@@ -38,5 +36,4 @@ public class MyBatisPlusConfig {
 
         return interceptor;
     }
-    */
 }

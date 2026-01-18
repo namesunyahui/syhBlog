@@ -1,14 +1,50 @@
 <template>
   <div class="article-list">
-    <el-card>
+    <!-- 搜索过滤区域 -->
+    <el-card class="filter-card" shadow="never">
+      <el-form :inline="true" :model="filterForm" class="filter-form">
+        <el-form-item label="文章标题">
+          <el-input
+            v-model="filterForm.title"
+            placeholder="请输入文章标题"
+            clearable
+            style="width: 200px"
+          />
+        </el-form-item>
+        <el-form-item label="分类">
+          <el-select
+            v-model="filterForm.categoryId"
+            placeholder="请选择分类"
+            clearable
+            style="width: 150px"
+          >
+            <el-option
+              v-for="category in categories"
+              :key="category.id"
+              :label="category.name"
+              :value="category.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <!-- 表格区域 -->
+    <el-card class="table-card" shadow="never">
       <template #header>
-        <div class="card-header">
-          <span>文章列表</span>
-          <el-button type="primary" @click="handleAdd">新增文章</el-button>
+        <div class="table-header">
+          <el-button type="primary" @click="handleAdd">
+            <el-icon><Plus /></el-icon>
+            新增文章
+          </el-button>
         </div>
       </template>
 
-      <el-table :data="articles" border v-loading="loading">
+      <el-table :data="articles" border v-loading="loading" class="article-table">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="title" label="标题" />
         <el-table-column prop="category" label="分类" width="120">
@@ -43,14 +79,29 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="pagination.page"
+          v-model:page-size="pagination.size"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
+      </div>
     </el-card>
 
     <!-- 预览对话框 -->
     <el-dialog
       v-model="previewVisible"
       title="文章预览"
-      width="80%"
+      width="90%"
+      top="5vh"
       :close-on-click-modal="false"
+      class="preview-dialog"
     >
       <div class="preview-container" v-if="currentArticle">
         <h1 class="preview-title">{{ currentArticle.title || '(无标题)' }}</h1>
@@ -90,8 +141,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { View, Clock } from '@element-plus/icons-vue'
+import { View, Clock, Plus } from '@element-plus/icons-vue'
 import { getAdminArticles, deleteArticle, getArticleDetail, publishArticle } from '@/api/article'
+import { getAllCategories } from '@/api/category'
 
 declare global {
   interface Window {
@@ -104,6 +156,20 @@ const articles = ref([])
 const loading = ref(false)
 const previewVisible = ref(false)
 const currentArticle = ref<any>(null)
+const categories = ref<any[]>([])
+
+// 过滤表单
+const filterForm = ref({
+  title: '',
+  categoryId: undefined as number | undefined
+})
+
+// 分页
+const pagination = ref({
+  page: 1,
+  size: 10,
+  total: 0
+})
 
 const previewHtml = computed(() => {
   if (!currentArticle.value?.content) {
@@ -115,16 +181,64 @@ const previewHtml = computed(() => {
   return '<pre>' + currentArticle.value.content + '</pre>'
 })
 
+const loadCategories = async () => {
+  try {
+    const res = await getAllCategories()
+    categories.value = res.data || []
+  } catch (error) {
+    ElMessage.error('加载分类列表失败')
+  }
+}
+
 const loadArticles = async () => {
   try {
     loading.value = true
-    const res = await getAdminArticles({ page: 1, size: 100 })
+    const params: any = {
+      page: pagination.value.page,
+      size: pagination.value.size
+    }
+
+    // 添加过滤参数
+    if (filterForm.value.title) {
+      params.title = filterForm.value.title
+    }
+    if (filterForm.value.categoryId) {
+      params.categoryId = filterForm.value.categoryId
+    }
+
+    const res = await getAdminArticles(params)
     articles.value = res.data?.records || []
+    pagination.value.total = res.data?.total || 0
   } catch (error) {
     ElMessage.error('加载文章列表失败')
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  pagination.value.page = 1
+  loadArticles()
+}
+
+const handleReset = () => {
+  filterForm.value = {
+    title: '',
+    categoryId: undefined
+  }
+  pagination.value.page = 1
+  loadArticles()
+}
+
+const handlePageChange = (page: number) => {
+  pagination.value.page = page
+  loadArticles()
+}
+
+const handleSizeChange = (size: number) => {
+  pagination.value.size = size
+  pagination.value.page = 1
+  loadArticles()
 }
 
 const handleAdd = () => {
@@ -163,6 +277,12 @@ const handleDelete = async (row: any) => {
 
     await deleteArticle(row.id)
     ElMessage.success('删除成功')
+
+    // 如果当前页只有一条数据且不是第一页，则返回上一页
+    if (articles.value.length === 1 && pagination.value.page > 1) {
+      pagination.value.page--
+    }
+
     loadArticles()
   } catch (error: any) {
     if (error !== 'cancel') {
@@ -195,20 +315,93 @@ const formatDate = (date: string) => {
 }
 
 onMounted(() => {
+  loadCategories()
   loadArticles()
 })
 </script>
 
 <style scoped>
-.card-header {
+.article-list {
+  padding: 8px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 搜索过滤卡片 */
+.filter-card {
+  flex-shrink: 0;
+}
+
+.filter-card :deep(.el-card__body) {
+  padding: 12px;
+}
+
+.filter-form {
+  margin-bottom: 0;
+}
+
+.filter-form .el-form-item {
+  margin-bottom: 0;
+}
+
+/* 表格卡片 */
+.table-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.table-card :deep(.el-card__header) {
+  padding: 8px 12px;
+  background-color: #f5f7fa;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.table-card :deep(.el-card__body) {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-header {
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
 }
 
+.article-table {
+  flex: 1;
+}
+
+.article-table :deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* 分页容器 */
+.pagination-container {
+  padding: 8px 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid #ebeef5;
+  background-color: #fff;
+  flex-shrink: 0;
+}
+
+/* 预览容器 */
 .preview-container {
-  max-height: 60vh;
+  max-height: calc(90vh - 150px);
   overflow-y: auto;
+  padding: 10px 0;
 }
 
 .preview-title {
@@ -251,6 +444,29 @@ onMounted(() => {
   font-style: italic;
   text-align: center;
   padding: 40px;
+}
+
+/* 预览弹窗样式 */
+.preview-dialog :deep(.el-dialog) {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  margin-top: 5vh !important;
+  margin-bottom: 5vh !important;
+}
+
+.preview-dialog :deep(.el-dialog__body) {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 20px;
+}
+
+.preview-dialog :deep(.el-dialog__header) {
+  flex-shrink: 0;
+}
+
+.preview-dialog :deep(.el-dialog__footer) {
+  flex-shrink: 0;
 }
 
 /* Markdown 样式 */

@@ -3,7 +3,10 @@ package com.syh.blog.config;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -18,6 +21,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @since 2024-01-01
  */
 @Configuration
+@ConditionalOnProperty(name = "spring.data.redis.host")
 public class RedisConfig {
 
     @Bean
@@ -30,6 +34,11 @@ public class RedisConfig {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        // 支持 Java 8 时间类型（如 LocalDateTime）
+        mapper.registerModule(new JavaTimeModule());
+        // 使用可读的日期时间字符串，而不是时间戳
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        // 启用默认类型信息，避免反序列化类型丢失
         mapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
         serializer.setObjectMapper(mapper);
 

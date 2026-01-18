@@ -1,9 +1,9 @@
 <template>
   <div class="article-edit">
-    <el-card>
+    <el-card class="edit-card" shadow="never">
       <el-tabs v-model="activeTab" type="border-card">
         <el-tab-pane label="编辑" name="edit">
-          <el-form :model="form" label-width="100px">
+          <el-form :model="form" label-width="80px" class="edit-form">
             <el-form-item label="文章标题">
               <el-input v-model="form.title" placeholder="请输入文章标题" />
             </el-form-item>
@@ -12,25 +12,57 @@
               <el-input
                 v-model="form.summary"
                 type="textarea"
-                :rows="3"
+                :rows="2"
                 placeholder="请输入文章摘要"
               />
             </el-form-item>
 
-            <el-form-item label="文章内容">
+            <el-row :gutter="8">
+              <el-col :span="12">
+                <el-form-item label="分类">
+                  <el-select
+                    v-model="form.categoryId"
+                    placeholder="请选择分类"
+                    clearable
+                    style="width: 100%"
+                  >
+                    <el-option
+                      v-for="category in categories"
+                      :key="category.id"
+                      :label="category.name"
+                      :value="category.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="标签">
+                  <el-select
+                    v-model="form.tagIds"
+                    placeholder="请选择标签"
+                    multiple
+                    clearable
+                    style="width: 100%"
+                  >
+                    <el-option
+                      v-for="tag in tags"
+                      :key="tag.id"
+                      :label="tag.name"
+                      :value="tag.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-form-item label="文章内容" class="content-item">
               <el-input
                 v-model="form.content"
                 type="textarea"
-                :rows="20"
+                :rows="15"
                 placeholder="请输入Markdown格式的文章内容"
                 @input="updatePreview"
               />
-            </el-form-item>
-
-            <el-form-item>
-              <el-button type="primary" @click="handleSave" :loading="loading">保存草稿</el-button>
-              <el-button type="success" @click="handlePublish" :loading="loading">发布文章</el-button>
-              <el-button @click="handleBack">返回</el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
@@ -43,14 +75,15 @@
             </div>
             <div class="preview-content markdown-body" v-html="previewHtml"></div>
           </div>
-
-          <div class="preview-actions">
-            <el-button type="primary" @click="handleSave" :loading="loading">保存草稿</el-button>
-            <el-button type="success" @click="handlePublish" :loading="loading">发布文章</el-button>
-            <el-button @click="handleBack">返回</el-button>
-          </div>
         </el-tab-pane>
       </el-tabs>
+
+      <!-- 固定在底部的操作按钮 -->
+      <div class="action-bar">
+        <el-button type="primary" @click="handleSave" :loading="loading">保存草稿</el-button>
+        <el-button type="success" @click="handlePublish" :loading="loading">发布文章</el-button>
+        <el-button @click="handleBack">返回</el-button>
+      </div>
     </el-card>
   </div>
 </template>
@@ -60,6 +93,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { createArticle, updateArticle, getArticleDetail, publishArticle } from '@/api/article'
+import { getAllCategories } from '@/api/category'
+import { getAllTags } from '@/api/tag'
 
 declare global {
   interface Window {
@@ -76,8 +111,13 @@ const form = ref({
   id: undefined,
   title: '',
   summary: '',
-  content: ''
+  content: '',
+  categoryId: undefined,
+  tagIds: [] as number[]
 })
+
+const categories = ref<any[]>([])
+const tags = ref<any[]>([])
 
 const previewHtml = computed(() => {
   if (!form.value.content) {
@@ -102,10 +142,30 @@ const loadArticleDetail = async (id: number) => {
       id: article.id,
       title: article.title || '',
       summary: article.summary || '',
-      content: article.content || ''
+      content: article.content || '',
+      categoryId: article.categoryId,
+      tagIds: article.tags ? article.tags.map((tag: any) => tag.id) : []
     }
   } catch (error) {
     ElMessage.error('加载文章详情失败')
+  }
+}
+
+const loadCategories = async () => {
+  try {
+    const res = await getAllCategories()
+    categories.value = res.data || []
+  } catch (error) {
+    ElMessage.error('加载分类列表失败')
+  }
+}
+
+const loadTags = async () => {
+  try {
+    const res = await getAllTags()
+    tags.value = res.data || []
+  } catch (error) {
+    ElMessage.error('加载标签列表失败')
   }
 }
 
@@ -122,6 +182,8 @@ const handleSave = async () => {
       title: form.value.title,
       summary: form.value.summary,
       content: form.value.content,
+      categoryId: form.value.categoryId,
+      tags: form.value.tagIds.map(tagId => ({ id: tagId })),
       isPublished: false
     }
 
@@ -153,6 +215,8 @@ const handlePublish = async () => {
       title: form.value.title,
       summary: form.value.summary,
       content: form.value.content,
+      categoryId: form.value.categoryId,
+      tags: form.value.tagIds.map(tagId => ({ id: tagId })),
       isPublished: true
     }
 
@@ -178,6 +242,8 @@ const handleBack = () => {
 }
 
 onMounted(() => {
+  loadCategories()
+  loadTags()
   const id = route.query.id as number
   if (id) {
     loadArticleDetail(id)
@@ -187,40 +253,120 @@ onMounted(() => {
 
 <style scoped>
 .article-edit {
-  padding: 20px;
+  padding: 8px;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
+.edit-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.edit-card :deep(.el-card__body) {
+  flex: 1;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.edit-card :deep(.el-tabs) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.edit-card :deep(.el-tabs__content) {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 12px 0 12px;
+}
+
+.edit-card :deep(.el-tab-pane) {
+  height: 100%;
+}
+
+.edit-form {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.edit-form :deep(.el-form-item) {
+  margin-bottom: 10px;
+}
+
+.edit-form :deep(.el-form-item__label) {
+  padding: 0 8px 0 0;
+}
+
+.content-item {
+  margin-bottom: 0 !important;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-item :deep(.el-form-item__content) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-item :deep(.el-textarea) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-item :deep(.el-textarea__inner) {
+  flex: 1;
+  min-height: 200px;
+  font-family: 'Courier New', monospace;
+  line-height: 1.6;
+  resize: none;
+}
+
+/* 预览区域 */
 .preview-container {
-  padding: 20px;
-  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  padding: 8px 12px 0 12px;
 }
 
 .preview-title {
-  font-size: 28px;
-  margin-bottom: 16px;
+  font-size: 20px;
+  margin-bottom: 8px;
   color: #333;
   border-bottom: 1px solid #eee;
-  padding-bottom: 12px;
+  padding-bottom: 6px;
+  flex-shrink: 0;
 }
 
 .preview-summary {
-  padding: 12px;
+  padding: 6px 10px;
   background-color: #f5f7fa;
   border-left: 4px solid #409eff;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   color: #606266;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
 .preview-content {
-  line-height: 1.8;
+  line-height: 1.6;
   color: #333;
-}
-
-.preview-actions {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-  text-align: center;
+  overflow: auto;
+  flex: 1;
 }
 
 .placeholder {
@@ -230,31 +376,42 @@ onMounted(() => {
   padding: 40px;
 }
 
+/* 固定底部的操作按钮 */
+.action-bar {
+  padding: 8px 12px;
+  border-top: 1px solid #ebeef5;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 /* Markdown 样式 */
 .markdown-body :deep(h1) {
-  font-size: 2em;
-  margin-top: 24px;
-  margin-bottom: 16px;
+  font-size: 1.8em;
+  margin-top: 16px;
+  margin-bottom: 12px;
   border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 }
 
 .markdown-body :deep(h2) {
-  font-size: 1.5em;
-  margin-top: 24px;
-  margin-bottom: 16px;
+  font-size: 1.4em;
+  margin-top: 16px;
+  margin-bottom: 12px;
   border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 }
 
 .markdown-body :deep(h3) {
-  font-size: 1.25em;
-  margin-top: 20px;
-  margin-bottom: 12px;
+  font-size: 1.2em;
+  margin-top: 14px;
+  margin-bottom: 10px;
 }
 
 .markdown-body :deep(p) {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .markdown-body :deep(code) {
@@ -267,10 +424,10 @@ onMounted(() => {
 
 .markdown-body :deep(pre) {
   background-color: #f6f8fa;
-  padding: 16px;
+  padding: 12px;
   border-radius: 6px;
   overflow-x: auto;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .markdown-body :deep(pre code) {
@@ -281,7 +438,7 @@ onMounted(() => {
 
 .markdown-body :deep(ul),
 .markdown-body :deep(ol) {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   padding-left: 2em;
 }
 
@@ -291,9 +448,9 @@ onMounted(() => {
 
 .markdown-body :deep(blockquote) {
   border-left: 4px solid #dfe2e5;
-  padding-left: 16px;
+  padding-left: 12px;
   color: #6a737d;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .markdown-body :deep(a) {
@@ -308,13 +465,13 @@ onMounted(() => {
 .markdown-body :deep(table) {
   border-collapse: collapse;
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .markdown-body :deep(table th),
 .markdown-body :deep(table td) {
   border: 1px solid #dfe2e5;
-  padding: 8px 12px;
+  padding: 6px 10px;
 }
 
 .markdown-body :deep(table th) {
@@ -326,6 +483,6 @@ onMounted(() => {
   max-width: 100%;
   height: auto;
   display: block;
-  margin: 16px 0;
+  margin: 12px 0;
 }
 </style>

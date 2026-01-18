@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 /**
  * 文章Mapper
  *
@@ -34,4 +36,13 @@ public interface ArticleMapper extends BaseMapper<Article> {
             "WHERE status = 'PUBLISHED' " +
             "ORDER BY created_at DESC")
     IPage<Article> getArchiveList(Page<Article> page);
+
+    /**
+     * 查询同时包含所有指定标签的文章
+     */
+    IPage<Article> selectArticlesByTags(
+            Page<Article> page,
+            @Param("tagIds") List<Long> tagIds,
+            @Param("tagIdsSize") int tagIdsSize
+    );
 }

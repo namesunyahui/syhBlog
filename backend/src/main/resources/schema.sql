@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS categories (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(200),
+    sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS categories (
 COMMENT ON TABLE categories IS '文章分类表';
 COMMENT ON COLUMN categories.name IS '分类名称';
 COMMENT ON COLUMN categories.description IS '分类描述';
+COMMENT ON COLUMN categories.sort_order IS '排序顺序';
 
 -- 标签表
 CREATE TABLE IF NOT EXISTS tags (

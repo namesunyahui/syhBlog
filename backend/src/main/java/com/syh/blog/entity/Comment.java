@@ -43,10 +43,7 @@ public class Comment {
      */
     private String ipAddress;
 
-    /**
-     * 是否审核通过
-     */
-    private Boolean isApproved;
+
 
     /**
      * 创建时间
@@ -100,14 +97,6 @@ public class Comment {
 
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
-    }
-
-    public Boolean getIsApproved() {
-        return isApproved;
-    }
-
-    public void setIsApproved(Boolean isApproved) {
-        this.isApproved = isApproved;
     }
 
     public LocalDateTime getCreatedAt() {

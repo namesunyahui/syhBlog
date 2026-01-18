@@ -21,6 +21,11 @@ public interface ArticleService extends IService<Article> {
     IPage<Article> getPublishedArticles(Page<Article> page, Long categoryId, Long tagId);
 
     /**
+     * 根据多个标签查询文章（文章必须同时包含所有指定标签）
+     */
+    IPage<Article> getArticlesByTags(Page<Article> page, List<Long> tagIds);
+
+    /**
      * 获取文章详情（包含分类和标签）
      */
     Article getArticleDetail(Long id);
@@ -60,7 +65,7 @@ public interface ArticleService extends IService<Article> {
     /**
      * 获取所有文章（包括草稿）
      */
-    IPage<Article> getAllArticles(Page<Article> page);
+    IPage<Article> getAllArticles(Page<Article> page, String title, Long categoryId);
 
     /**
      * 创建文章
@@ -81,5 +86,15 @@ public interface ArticleService extends IService<Article> {
      * 发布或撤回文章
      */
     void publishArticle(Long id, Boolean publish);
+
+    /**
+     * 获取热门文章（按浏览量排序）
+     */
+    List<Article> getHotArticles(Integer limit);
+
+    /**
+     * 获取相关文章（同分类或同标签的文章，排除当前文章）
+     */
+    List<Article> getRelatedArticles(Long articleId, Integer limit);
 }
 

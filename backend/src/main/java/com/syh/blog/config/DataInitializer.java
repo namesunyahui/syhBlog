@@ -61,7 +61,17 @@ public class DataInitializer implements CommandLineRunner {
             logger.info("请及时修改默认密码！");
             logger.info("========================================");
         } else {
-            logger.info("默认管理员账户已存在，跳过初始化");
+            logger.info("默认管理员账户已存在，检查角色配置...");
+
+            // 如果角色不是 SUPER_ADMIN，自动更新
+            if (!"SUPER_ADMIN".equals(existingUser.getRole())) {
+                logger.warn("检测到 admin 用户角色不是超级管理员，正在更新...");
+                existingUser.setRole("SUPER_ADMIN");
+                userService.updateById(existingUser);
+                logger.info("admin 用户角色已更新为 SUPER_ADMIN");
+            } else {
+                logger.info("admin 用户角色配置正确（SUPER_ADMIN）");
+            }
         }
     }
 }

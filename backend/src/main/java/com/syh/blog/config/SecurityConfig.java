@@ -83,7 +83,8 @@ public class SecurityConfig {
                     "/csrf",
                     "/actuator/**",
                     "/swagger-ui/**",
-                    "/swagger-ui.html"
+                    "/swagger-ui.html",
+                    "/error"                         // 允许访问错误页面
                 ).permitAll()
                 // 其他所有请求需要认证
                 .anyRequest().authenticated()

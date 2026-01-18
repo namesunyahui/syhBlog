@@ -5,6 +5,15 @@ export const getArticleList = (params: any) => {
   return request.get('/articles', { params })
 }
 
+// 根据多个标签查询文章
+export const getArticlesByTags = (params: {
+  tagIds: string  // 逗号分隔的标签ID，如 "1,2,3"
+  page: number
+  size: number
+}) => {
+  return request.get('/articles', { params })
+}
+
 // 文章详情
 export const getArticleDetail = (id: number) => {
   return request.get(`/articles/${id}`)
@@ -23,6 +32,16 @@ export const getArticleArchive = () => {
 // 搜索文章
 export const searchArticles = (keyword: string) => {
   return request.get('/articles/search', { params: { keyword } })
+}
+
+// 获取热门文章
+export const getHotArticles = (limit = 5) => {
+  return request.get('/articles/hot', { params: { limit } })
+}
+
+// 获取相关文章
+export const getRelatedArticles = (articleId: number, limit = 5) => {
+  return request.get(`/articles/${articleId}/related`, { params: { limit } })
 }
 
 // ============ 后台管理接口 ============

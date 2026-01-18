@@ -33,6 +33,10 @@
           <el-icon><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
+        <el-menu-item index="/">
+          <el-icon><HomeFilled /></el-icon>
+          <span>返回首页</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -112,6 +116,8 @@ const handleLogout = async () => {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
+  padding: 0 12px;
+  height: 50px;
 }
 
 .header-content {
@@ -128,5 +134,6 @@ const handleLogout = async () => {
 
 .el-main {
   background: #f5f7fa;
+  padding: 0;
 }
 </style>

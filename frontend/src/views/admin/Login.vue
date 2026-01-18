@@ -113,7 +113,7 @@ const handleLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   position: relative;
   overflow: hidden;
 }
@@ -190,7 +190,7 @@ const handleLogin = async () => {
 .login-title {
   font-size: 32px;
   font-weight: bold;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -215,11 +215,11 @@ const handleLogin = async () => {
 }
 
 .login-form :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 4px 12px rgba(74, 85, 104, 0.2);
 }
 
 .login-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
 }
 
 .login-button {
@@ -228,14 +228,14 @@ const handleLogin = async () => {
   font-size: 16px;
   font-weight: 600;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   border: none;
   transition: all 0.3s ease;
 }
 
 .login-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(74, 85, 104, 0.4);
 }
 
 .login-tips {
@@ -245,20 +245,20 @@ const handleLogin = async () => {
 .login-tips :deep(.el-alert) {
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
 }
 
 .login-footer {
   text-align: center;
   padding-top: 10px;
-  border-top: 1px solid rgba(102, 126, 234, 0.1);
+  border-top: 1px solid rgba(74, 85, 104, 0.1);
   display: flex;
   justify-content: space-between;
 }
 
 .register-link,
 .back-link {
-  color: #667eea;
+  color: #4a5568;
   text-decoration: none;
   font-size: 14px;
   transition: all 0.3s ease;
@@ -266,7 +266,7 @@ const handleLogin = async () => {
 
 .register-link:hover,
 .back-link:hover {
-  color: #764ba2;
+  color: #2c3e50;
   text-decoration: underline;
 }
 

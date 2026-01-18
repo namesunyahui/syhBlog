@@ -9,6 +9,10 @@ spring:
   config:
     import: optional:file:./.env[.properties]
 
+  # 自动配置排除（如果Redis不可用，可以启用此项）
+  # autoconfigure:
+  #   exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
   # 数据源配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -46,10 +50,10 @@ spring:
       mode: never
       encoding: UTF-8
 
-  # Redis配置
+  # Redis配置（可选，如果未设置将自动禁用）
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
       database: 0

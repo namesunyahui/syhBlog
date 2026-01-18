@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syh.blog.mapper.ArticleMapper">
+
+    <!--
+        查询同时包含所有指定标签的文章
+        使用 GROUP BY + HAVING 确保文章同时包含所有指定的标签
+    -->
+    <select id="selectArticlesByTags" resultType="com.syh.blog.entity.Article">
+        SELECT DISTINCT a.*
+        FROM articles a
+        INNER JOIN article_tags at ON a.id = at.article_id
+        WHERE at.tag_id IN
+        <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
+            #{tagId}
+        </foreach>
+        AND a.is_published = true
+        AND a.is_deleted = 0
+        GROUP BY a.id
+        HAVING COUNT(DISTINCT at.tag_id) = #{tagIdsSize}
+        ORDER BY a.created_at DESC
+    </select>
+
+</mapper>

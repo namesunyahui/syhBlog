@@ -30,8 +30,28 @@ public class ArticleController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long tagId) {
+            @RequestParam(required = false) Long tagId,
+            @RequestParam(required = false) String tagIds) {
         Page<Article> pageParam = new Page<>(page, size);
+
+        // 如果传了 tagIds（多标签查询），优先使用
+        if (tagIds != null && !tagIds.trim().isEmpty()) {
+            try {
+                java.util.List<Long> idList = java.util.Arrays.stream(tagIds.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Long::valueOf)
+                    .collect(java.util.stream.Collectors.toList());
+                if (!idList.isEmpty()) {
+                    IPage<Article> articlePage = articleService.getArticlesByTags(pageParam, idList);
+                    return Result.success(articlePage);
+                }
+            } catch (NumberFormatException e) {
+                return Result.error("标签ID格式错误");
+            }
+        }
+
+        // 单标签查询或分类查询（原有逻辑）
         IPage<Article> articlePage = articleService.getPublishedArticles(pageParam, categoryId, tagId);
         return Result.success(articlePage);
     }
@@ -74,15 +94,34 @@ public class ArticleController {
         return Result.success(articlePage);
     }
 
+    @Operation(summary = "获取热门文章")
+    @GetMapping("/hot")
+    public Result<java.util.List<Article>> getHotArticles(
+            @RequestParam(defaultValue = "5") Integer limit) {
+        java.util.List<Article> articles = articleService.getHotArticles(limit);
+        return Result.success(articles);
+    }
+
+    @Operation(summary = "获取相关文章")
+    @GetMapping("/{id}/related")
+    public Result<java.util.List<Article>> getRelatedArticles(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "5") Integer limit) {
+        java.util.List<Article> articles = articleService.getRelatedArticles(id, limit);
+        return Result.success(articles);
+    }
+
     // ==================== 管理后台接口 ====================
 
     @Operation(summary = "获取所有文章（包括草稿）")
     @GetMapping("/all")
     public Result<IPage<Article>> getAllArticles(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) Long categoryId) {
         Page<Article> pageParam = new Page<>(page, size);
-        IPage<Article> articlePage = articleService.getAllArticles(pageParam);
+        IPage<Article> articlePage = articleService.getAllArticles(pageParam, title, categoryId);
         return Result.success(articlePage);
     }
 

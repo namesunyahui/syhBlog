@@ -109,6 +109,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     }
 
     @Override
+    public IPage<Article> getArticlesByTags(Page<Article> page, List<Long> tagIds) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return new Page<>();
+        }
+
+        // 使用自定义查询方法
+        IPage<Article> articlePage = articleMapper.selectArticlesByTags(page, tagIds, tagIds.size());
+
+        // 批量填充分类和标签信息
+        batchFillRelatedInfo(articlePage.getRecords());
+
+        return articlePage;
+    }
+
+    @Override
     public Article getArticleDetail(Long id) {
         Article article = getById(id);
         if (article != null) {
@@ -206,11 +221,22 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     // ============ 管理后台方法实现 ============
 
     @Override
-    public IPage<Article> getAllArticles(Page<Article> page) {
+    public IPage<Article> getAllArticles(Page<Article> page, String title, Long categoryId) {
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
         // 排除content字段，在数据库查询时就过滤掉（管理后台列表也不需要完整内容）
-        wrapper.select(Article.class, info -> !info.getColumn().equals("content"))
-               .orderByDesc(Article::getCreatedAt);
+        wrapper.select(Article.class, info -> !info.getColumn().equals("content"));
+
+        // 按标题过滤
+        if (title != null && !title.trim().isEmpty()) {
+            wrapper.like(Article::getTitle, title.trim());
+        }
+
+        // 按分类过滤
+        if (categoryId != null) {
+            wrapper.eq(Article::getCategoryId, categoryId);
+        }
+
+        wrapper.orderByDesc(Article::getCreatedAt);
 
         IPage<Article> articlePage = page(page, wrapper);
         batchFillRelatedInfo(articlePage.getRecords());
@@ -396,6 +422,66 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 article.setTags(tags);
             }
         }
+    }
+
+    @Override
+    public List<Article> getHotArticles(Integer limit) {
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Article::getIsPublished, true)
+               .select(Article.class, info -> !info.getProperty().equals("content"))
+               .orderByDesc(Article::getViewCount)
+               .last("LIMIT " + (limit != null && limit > 0 ? limit : 5));
+
+        List<Article> articles = list(wrapper);
+        batchFillRelatedInfo(articles);
+        return articles;
+    }
+
+    @Override
+    public List<Article> getRelatedArticles(Long articleId, Integer limit) {
+        // 获取当前文章信息
+        Article currentArticle = getById(articleId);
+        if (currentArticle == null) {
+            return List.of();
+        }
+
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Article::getIsPublished, true)
+               .ne(Article::getId, articleId)  // 排除当前文章
+               .select(Article.class, info -> !info.getProperty().equals("content"));
+
+        // 优先找同分类的文章
+        if (currentArticle.getCategoryId() != null) {
+            wrapper.eq(Article::getCategoryId, currentArticle.getCategoryId());
+        }
+
+        wrapper.orderByDesc(Article::getViewCount)
+               .last("LIMIT " + (limit != null && limit > 0 ? limit : 5));
+
+        List<Article> articles = list(wrapper);
+        batchFillRelatedInfo(articles);
+
+        // 如果同分类文章不足，尝试获取同标签的文章
+        if (articles.size() < (limit != null ? limit : 5)) {
+            articles.clear();
+            LambdaQueryWrapper<Article> tagWrapper = new LambdaQueryWrapper<>();
+            tagWrapper.eq(Article::getIsPublished, true)
+                      .ne(Article::getId, articleId)
+                      .select(Article.class, info -> !info.getProperty().equals("content"));
+
+            // 如果有分类，排除同分类的文章（避免重复）
+            if (currentArticle.getCategoryId() != null) {
+                tagWrapper.ne(Article::getCategoryId, currentArticle.getCategoryId());
+            }
+
+            tagWrapper.orderByDesc(Article::getViewCount)
+                      .last("LIMIT " + (limit != null && limit > 0 ? limit : 5));
+
+            articles = list(tagWrapper);
+            batchFillRelatedInfo(articles);
+        }
+
+        return articles;
     }
 
     /**

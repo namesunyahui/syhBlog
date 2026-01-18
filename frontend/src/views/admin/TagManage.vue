@@ -1,14 +1,17 @@
 <template>
   <div class="tag-manage">
-    <el-card>
+    <!-- 表格区域 -->
+    <el-card class="table-card" shadow="never">
       <template #header>
-        <div class="card-header">
-          <span>标签管理</span>
-          <el-button type="primary" @click="handleAdd">新增标签</el-button>
+        <div class="table-header">
+          <el-button type="primary" @click="handleAdd">
+            <el-icon><Plus /></el-icon>
+            新增标签
+          </el-button>
         </div>
       </template>
 
-      <el-table :data="tags" border v-loading="loading">
+      <el-table :data="tags" border v-loading="loading" class="tag-table">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="标签名称" />
         <el-table-column prop="createdAt" label="创建时间" width="180">
@@ -49,6 +52,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   getAllTags,
@@ -163,9 +167,51 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.card-header {
+.tag-manage {
+  padding: 8px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 表格卡片 */
+.table-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.table-card :deep(.el-card__header) {
+  padding: 8px 12px;
+  background-color: #f5f7fa;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.table-card :deep(.el-card__body) {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-header {
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
+}
+
+.tag-table {
+  flex: 1;
+}
+
+.tag-table :deep(.el-table__header-wrapper) {
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 </style>
