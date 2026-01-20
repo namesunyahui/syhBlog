@@ -1,7 +1,7 @@
 package com.syh.blog.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import lombok.NoArgsConstructor;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * @author sunyahui
  * @since 2024-01-01
  */
-@NoArgsConstructor
+@Data
 @TableName("comments")
 public class Comment {
 
@@ -24,12 +24,17 @@ public class Comment {
     private Long articleId;
 
     /**
+     * 用户ID（登录用户）
+     */
+    private Long userId;
+
+    /**
      * 评论内容
      */
     private String content;
 
     /**
-     * 昵称
+     * 昵称（未登录用户）
      */
     private String nickname;
 
@@ -43,67 +48,9 @@ public class Comment {
      */
     private String ipAddress;
 
-
-
     /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getArticleId() {
-        return articleId;
-    }
-
-    public void setArticleId(Long articleId) {
-        this.articleId = articleId;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }

@@ -30,8 +30,14 @@ export const getArticleArchive = () => {
 }
 
 // 搜索文章
-export const searchArticles = (keyword: string) => {
-  return request.get('/articles/search', { params: { keyword } })
+export const searchArticles = (params: {
+  keyword?: string
+  page?: number
+  size?: number
+  categoryId?: number
+  tagId?: number
+}) => {
+  return request.get('/articles/search', { params })
 }
 
 // 获取热门文章

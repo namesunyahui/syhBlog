@@ -89,18 +89,42 @@
                 <h3>评论 ({{ comments.length }})</h3>
               </template>
 
-              <el-form :model="commentForm" label-width="80px">
+              <!-- 未登录用户：显示昵称输入框 -->
+              <el-form v-if="!isLoggedIn" :model="commentForm" label-width="80px">
                 <el-form-item label="昵称">
-                  <el-input v-model="commentForm.nickname" />
-                </el-form-item>
-                <el-form-item label="邮箱">
-                  <el-input v-model="commentForm.email" />
+                  <el-input v-model="commentForm.nickname" placeholder="点击按钮生成随机昵称或自定义">
+                    <template #append>
+                      <el-button @click="generateNickname" type="primary">🎲 随机生成</el-button>
+                    </template>
+                  </el-input>
                 </el-form-item>
                 <el-form-item label="评论内容">
                   <el-input
                     v-model="commentForm.content"
                     type="textarea"
                     :rows="4"
+                    placeholder="说点什么吧..."
+                  />
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="primary" @click="submitComment">提交评论</el-button>
+                </el-form-item>
+              </el-form>
+
+              <!-- 登录用户：直接显示用户信息 -->
+              <el-form v-else :model="commentForm" label-width="80px">
+                <el-form-item label="当前用户">
+                  <div class="user-info-display">
+                    <el-avatar :size="32" :src="userInfo.avatar || defaultAvatar" />
+                    <span>{{ userInfo.nickname || userInfo.username || '管理员' }}</span>
+                  </div>
+                </el-form-item>
+                <el-form-item label="评论内容">
+                  <el-input
+                    v-model="commentForm.content"
+                    type="textarea"
+                    :rows="4"
+                    placeholder="说点什么吧..."
                   />
                 </el-form-item>
                 <el-form-item>
@@ -111,12 +135,20 @@
               <div class="comment-list">
                 <div v-for="comment in comments" :key="comment.id" class="comment-item">
                   <div class="comment-header">
-                    <strong>{{ comment.nickname }}</strong>
+                    <div class="comment-user">
+                      <el-avatar
+                        v-if="comment.userAvatar"
+                        :size="32"
+                        :src="comment.userAvatar"
+                        class="comment-avatar"
+                      />
+                      <strong>{{ comment.displayName || comment.nickname || '匿名用户' }}</strong>
+                    </div>
                     <span class="comment-time">{{ formatDate(comment.createdAt) }}</span>
                   </div>
                   <div class="comment-content">{{ comment.content }}</div>
                 </div>
-                <el-empty v-if="comments.length === 0" description="暂无评论" />
+                <el-empty v-if="comments.length === 0" description="暂无评论，快来抢沙发吧！" />
               </div>
             </el-card>
           </div>
@@ -184,6 +216,7 @@ import MarkdownIt from 'markdown-it'
 import { getArticleDetail, addViewCount, getHotArticles, getRelatedArticles } from '@/api/article'
 import { getCommentList, submitComment as postComment } from '@/api/comment'
 import { logout } from '@/api/auth'
+import { generateRandomNickname } from '@/utils/nicknameGenerator'
 
 const route = useRoute()
 const router = useRouter()
@@ -193,7 +226,6 @@ const loading = ref(false)
 const error = ref('')
 const commentForm = ref({
   nickname: '',
-  email: '',
   content: ''
 })
 const userInfo = ref<any>({})
@@ -238,7 +270,7 @@ const loadArticle = async () => {
       try {
         const commentRes = await getCommentList(id)
         if (commentRes.code === 200) {
-          comments.value = commentRes.data || []
+          comments.value = commentRes.data?.records || []
         }
       } catch (commentError) {
         console.warn('加载评论失败:', commentError)
@@ -289,22 +321,34 @@ const goToArticle = (id: number) => {
 }
 
 const submitComment = async () => {
-  if (!commentForm.value.nickname || !commentForm.value.content) {
-    ElMessage.warning('请填写昵称和评论内容')
+  // 未登录用户必须填写昵称
+  if (!isLoggedIn.value && !commentForm.value.nickname) {
+    ElMessage.warning('请填写昵称')
+    return
+  }
+
+  if (!commentForm.value.content) {
+    ElMessage.warning('请填写评论内容')
     return
   }
 
   try {
-    const res = await postComment({
-      articleId: route.params.id,
-      ...commentForm.value
-    })
+    const data: any = {
+      articleId: Number(route.params.id),
+      content: commentForm.value.content
+    }
+
+    // 只有未登录用户才传 nickname
+    if (!isLoggedIn.value) {
+      data.nickname = commentForm.value.nickname
+    }
+
+    const res = await postComment(data)
 
     if (res.code === 200) {
       ElMessage.success('评论提交成功')
       commentForm.value = {
         nickname: '',
-        email: '',
         content: ''
       }
       // 重新加载评论
@@ -316,6 +360,11 @@ const submitComment = async () => {
     console.error('提交评论失败:', err)
     ElMessage.error(err.response?.data?.message || err.message || '评论提交失败')
   }
+}
+
+// 生成随机昵称
+const generateNickname = () => {
+  commentForm.value.nickname = generateRandomNickname()
 }
 
 const formatDate = (date: string) => {
@@ -378,10 +427,9 @@ onMounted(() => {
 }
 
 .article-detail-container {
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -403,38 +451,16 @@ onMounted(() => {
 .el-container {
   position: relative;
   z-index: 1;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 .el-main {
   padding: 20px 40px;
   flex: 1;
   width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   box-sizing: border-box;
-  min-height: 0;
-}
-
-.el-main::-webkit-scrollbar {
-  width: 8px;
-}
-
-.el-main::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.el-main::-webkit-scrollbar-thumb {
-  background: rgba(74, 85, 104, 0.3);
-  border-radius: 4px;
-}
-
-.el-main::-webkit-scrollbar-thumb:hover {
-  background: rgba(74, 85, 104, 0.5);
 }
 
 .el-header {
@@ -719,7 +745,18 @@ onMounted(() => {
 .comment-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.comment-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.comment-avatar {
+  flex-shrink: 0;
 }
 
 .comment-time {
@@ -730,6 +767,20 @@ onMounted(() => {
 .comment-content {
   line-height: 1.6;
   color: #606266;
+}
+
+.user-info-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
+  border-radius: 8px;
+}
+
+.user-info-display span {
+  font-weight: 500;
+  color: #303133;
 }
 
 /* 侧边栏样式 */

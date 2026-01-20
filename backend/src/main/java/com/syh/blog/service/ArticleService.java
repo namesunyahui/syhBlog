@@ -42,6 +42,11 @@ public interface ArticleService extends IService<Article> {
     IPage<Article> searchArticles(Page<Article> page, String keyword);
 
     /**
+     * 搜索文章（支持分类和标签筛选）
+     */
+    IPage<Article> searchArticles(Page<Article> page, String keyword, Long categoryId, Long tagId);
+
+    /**
      * 获取归档文章
      */
     IPage<Article> getArchiveList(Page<Article> page);

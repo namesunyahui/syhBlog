@@ -230,6 +230,10 @@
           </el-card>
         </div>
       </el-main>
+
+      <el-footer>
+        <p>&copy; 2025 Syh Blog. 用心记录，用爱分享 ✨</p>
+      </el-footer>
     </el-container>
   </div>
 </template>
@@ -300,10 +304,9 @@ onMounted(() => {
 
 <style scoped>
 .about-page {
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -325,10 +328,9 @@ onMounted(() => {
 .el-container {
   position: relative;
   z-index: 1;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 .el-header {
@@ -353,10 +355,14 @@ onMounted(() => {
 
 .site-title a {
   text-decoration: none;
-  color: #409eff;
+  color: #4a5568;
   font-size: 24px;
   font-weight: bold;
   display: block;
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .nav-menu {
@@ -383,12 +389,12 @@ onMounted(() => {
   left: 0;
   width: 0;
   height: 2px;
-  background: #409eff;
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   transition: width 0.3s ease;
 }
 
 .nav-menu a:hover {
-  color: #409eff;
+  color: #4a5568;
 }
 
 .nav-menu a:hover::after {
@@ -417,7 +423,7 @@ onMounted(() => {
 }
 
 .user-info:hover {
-  background: rgba(64, 158, 255, 0.1);
+  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(52, 73, 94, 0.1) 100%);
 }
 
 .username {
@@ -427,7 +433,7 @@ onMounted(() => {
 }
 
 .login-btn {
-  background: #409eff;
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   border: none;
   padding: 8px 24px;
   font-weight: 500;
@@ -437,34 +443,14 @@ onMounted(() => {
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
 }
 
 .el-main {
   padding: 40px 20px;
   flex: 1;
   width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   box-sizing: border-box;
-}
-
-.el-main::-webkit-scrollbar {
-  width: 8px;
-}
-
-.el-main::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.el-main::-webkit-scrollbar-thumb {
-  background: rgba(74, 85, 104, 0.3);
-  border-radius: 4px;
-}
-
-.el-main::-webkit-scrollbar-thumb:hover {
-  background: rgba(74, 85, 104, 0.5);
 }
 
 .about-content {
@@ -795,5 +781,16 @@ onMounted(() => {
   .nav-menu a {
     font-size: 14px;
   }
+}
+
+/* Footer */
+.el-footer {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  text-align: center;
+  color: #909399;
+  padding: 20px 40px;
+  border-top: 1px solid rgba(74, 85, 104, 0.1);
+  flex-shrink: 0;
 }
 </style>

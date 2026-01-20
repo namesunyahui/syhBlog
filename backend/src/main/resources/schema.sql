@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100),
     role VARCHAR(20) NOT NULL DEFAULT 'ADMIN',
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    is_deleted INTEGER DEFAULT 0,
     last_login_time TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -90,6 +91,7 @@ COMMENT ON COLUMN articles.updated_at IS '更新时间';
 CREATE TABLE IF NOT EXISTS comments (
     id BIGSERIAL PRIMARY KEY,
     article_id BIGINT NOT NULL REFERENCES articles(id) ON DELETE CASCADE,
+    user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
     nickname VARCHAR(50),
     email VARCHAR(100),
     content TEXT NOT NULL,
@@ -100,7 +102,8 @@ CREATE TABLE IF NOT EXISTS comments (
 COMMENT ON TABLE comments IS '评论表';
 COMMENT ON COLUMN comments.id IS '评论ID';
 COMMENT ON COLUMN comments.article_id IS '文章ID';
-COMMENT ON COLUMN comments.nickname IS '评论者昵称';
+COMMENT ON COLUMN comments.user_id IS '用户ID（登录用户）';
+COMMENT ON COLUMN comments.nickname IS '评论者昵称（未登录用户）';
 COMMENT ON COLUMN comments.email IS '评论者邮箱';
 COMMENT ON COLUMN comments.content IS '评论内容';
 COMMENT ON COLUMN comments.ip_address IS 'IP地址';

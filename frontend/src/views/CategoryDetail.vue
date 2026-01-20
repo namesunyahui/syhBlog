@@ -1,5 +1,5 @@
 <template>
-  <div class="home-container">
+  <div class="category-detail-container">
     <el-container>
       <el-header>
         <div class="header-content">
@@ -53,44 +53,82 @@
               </el-skeleton>
             </div>
 
-            <!-- 空状态 -->
-            <div v-else-if="articles.length === 0" class="empty-state">
-              <div class="empty-icon">📝</div>
-              <div class="empty-text">暂无文章</div>
-              <div class="empty-hint">敬请期待更多精彩内容</div>
+            <!-- 错误状态 -->
+            <div v-else-if="error" class="empty-state">
+              <div class="empty-icon">⚠️</div>
+              <div class="empty-text">{{ error }}</div>
+              <el-button type="primary" @click="router.push('/category')" style="margin-top: 20px;">
+                返回分类列表
+              </el-button>
             </div>
 
             <!-- 文章列表 -->
             <template v-else>
-              <el-card v-for="article in articles" :key="article.id" class="article-card">
-                <h2 class="article-title">
-                  <router-link :to="`/article/${article.id}`">
-                    {{ article.title }}
-                  </router-link>
-                </h2>
-                <div class="article-meta">
-                  <span>{{ formatDate(article.createdAt) }}</span>
-                  <span v-if="article.category">{{ article.category.name }}</span>
-                  <span>{{ article.viewCount }} 阅读</span>
-                </div>
-                <p class="article-summary">{{ article.summary }}</p>
-                <div class="article-tags" v-if="article.tags && article.tags.length">
-                  <el-tag v-for="tag in article.tags" :key="tag.id" size="small">
-                    {{ tag.name }}
-                  </el-tag>
+              <!-- 分类信息卡片 -->
+              <el-card class="category-info-card">
+                <div class="category-header">
+                  <div class="category-icon">{{ getCategoryIcon(category?.name) }}</div>
+                  <div class="category-info">
+                    <h1 class="category-title">{{ category?.name }}</h1>
+                    <p class="category-description">{{ category?.description || '暂无描述' }}</p>
+                    <div class="category-meta">
+                      <span class="meta-item">
+                        📝 共 {{ total }} 篇文章
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </el-card>
 
-              <el-pagination
-                v-model:current-page="currentPage"
-                :page-size="pageSize"
-                :total="total"
-                layout="prev, pager, next"
-                @current-change="handlePageChange"
-              />
+              <!-- 空状态 -->
+              <div v-if="articles.length === 0" class="empty-state">
+                <div class="empty-icon">📝</div>
+                <div class="empty-text">该分类下暂无文章</div>
+              </div>
+
+              <!-- 文章卡片列表 -->
+              <template v-else>
+                <el-card v-for="article in articles" :key="article.id" class="article-card">
+                  <h2 class="article-title">
+                    <router-link :to="`/article/${article.id}`">
+                      {{ article.title }}
+                    </router-link>
+                  </h2>
+                  <div class="article-meta">
+                    <span class="meta-item">
+                      <el-icon><Calendar /></el-icon>
+                      {{ formatDate(article.createdAt) }}
+                    </span>
+                    <span v-if="article.category" class="meta-item">
+                      <el-icon><Folder /></el-icon>
+                      {{ article.category.name }}
+                    </span>
+                    <span class="meta-item">
+                      <el-icon><View /></el-icon>
+                      {{ article.viewCount }} 阅读
+                    </span>
+                  </div>
+                  <p class="article-summary">{{ article.summary }}</p>
+                  <div class="article-tags" v-if="article.tags && article.tags.length">
+                    <el-tag v-for="tag in article.tags" :key="tag.id" size="small">
+                      {{ tag.name }}
+                    </el-tag>
+                  </div>
+                </el-card>
+
+                <!-- 分页 -->
+                <el-pagination
+                  v-model:current-page="currentPage"
+                  :page-size="pageSize"
+                  :total="total"
+                  layout="prev, pager, next"
+                  @current-change="handlePageChange"
+                />
+              </template>
             </template>
           </div>
 
+          <!-- 侧边栏 -->
           <div class="sidebar">
             <el-card class="sidebar-card">
               <template #header>
@@ -113,10 +151,10 @@
                 <h3>📁 分类</h3>
               </template>
               <ul class="category-list" v-if="categories.length">
-                <li v-for="category in categories" :key="category.id">
-                  <router-link :to="`/category/${category.id}`">
-                    <span>{{ category.name }}</span>
-                    <span class="count">{{ category.articleCount }}</span>
+                <li v-for="cat in categories" :key="cat.id">
+                  <router-link :to="`/category/${cat.id}`" :class="{ active: cat.id === Number(categoryId) }">
+                    <span>{{ cat.name }}</span>
+                    <span class="count">{{ cat.articleCount }}</span>
                   </router-link>
                 </li>
               </ul>
@@ -157,10 +195,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Search } from '@element-plus/icons-vue'
+import { Calendar, Folder, View, Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getArticleList } from '@/api/article'
-import { getCategoryList } from '@/api/category'
+import { getCategoryDetail, getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
 import { logout } from '@/api/auth'
 
@@ -168,6 +206,7 @@ const router = useRouter()
 const route = useRoute()
 
 const articles = ref([])
+const category = ref<any>(null)
 const categories = ref([])
 const tags = ref([])
 const currentPage = ref(1)
@@ -176,25 +215,47 @@ const total = ref(0)
 const searchKeyword = ref('')
 const userInfo = ref<any>({})
 const loading = ref(true)
+const error = ref('')
 
 const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+
+// 获取分类ID
+const categoryId = computed(() => route.params.id as string)
 
 // 检查登录状态
 const isLoggedIn = computed(() => {
   return !!localStorage.getItem('token')
 })
 
+// 加载分类信息
+const loadCategory = async () => {
+  try {
+    const res = await getCategoryDetail(Number(categoryId.value))
+    if (res.code === 200) {
+      category.value = res.data
+    } else {
+      error.value = res.message || '分类不存在'
+    }
+  } catch (err: any) {
+    console.error('加载分类信息失败', err)
+    error.value = '加载分类信息失败'
+  }
+}
+
+// 加载文章列表
 const loadArticles = async () => {
   loading.value = true
   try {
     const res = await getArticleList({
       page: currentPage.value,
-      size: pageSize.value
+      size: pageSize.value,
+      categoryId: Number(categoryId.value)
     })
     articles.value = res.data?.records || []
     total.value = res.data?.total || 0
-  } catch (error) {
-    console.error('加载文章失败', error)
+  } catch (err) {
+    console.error('加载文章失败', err)
+    ElMessage.error('加载文章失败')
     articles.value = []
     total.value = 0
   } finally {
@@ -202,43 +263,63 @@ const loadArticles = async () => {
   }
 }
 
+// 加载所有分类
 const loadCategories = async () => {
   try {
     const res = await getCategoryList()
     categories.value = res.data || []
-  } catch (error) {
-    console.error('加载分类失败', error)
-    categories.value = []
+  } catch (err) {
+    console.error('加载分类失败', err)
   }
 }
 
+// 加载标签列表
 const loadTags = async () => {
   try {
     const res = await getTagList()
     tags.value = res.data || []
-  } catch (error) {
-    console.error('加载标签失败', error)
-    tags.value = []
+  } catch (err) {
+    console.error('加载标签失败', err)
   }
 }
 
+// 分页变化
 const handlePageChange = (page: number) => {
   currentPage.value = page
   loadArticles()
+  // 滚动到顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+// 格式化日期
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('zh-CN')
+}
+
+// 获取分类图标
+const getCategoryIcon = (name: string) => {
+  const iconMap: Record<string, string> = {
+    '技术': '💻',
+    '生活': '🌱',
+    '学习': '📚',
+    '随笔': '✍️',
+    '教程': '📖',
+    '分享': '🎁',
+    '默认': '📁'
+  }
+  return iconMap[name || ''] || '📁'
+}
+
+// 搜索处理
 const handleSearch = () => {
   if (searchKeyword.value) {
     router.push({ path: '/search', query: { keyword: searchKeyword.value } })
   }
 }
 
+// 标签点击处理
 const handleTagClick = (tagName: string) => {
   router.push({ path: '/search', query: { tag: tagName } })
-}
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('zh-CN')
 }
 
 // 跳转到登录页面
@@ -265,9 +346,9 @@ const handleLogout = async () => {
     localStorage.removeItem('userInfo')
     userInfo.value = {}
     ElMessage.success('退出成功')
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('退出失败', error)
+  } catch (err) {
+    if (err !== 'cancel') {
+      console.error('退出失败', err)
     }
   }
 }
@@ -285,21 +366,27 @@ const loadUserInfo = () => {
 }
 
 onMounted(() => {
+  loadUserInfo()
+  loadCategory()
   loadArticles()
   loadCategories()
   loadTags()
-  loadUserInfo()
 })
 
-// 监听路由变化，当返回首页时重新加载文章列表
-watch(
-  () => route.path,
-  (newPath) => {
-    if (newPath === '/') {
-      loadArticles()
-    }
+// 监听路由参数变化，当分类ID变化时重新加载数据
+watch(() => route.params.id, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    // 重置状态
+    currentPage.value = 1
+    error.value = ''
+    articles.value = []
+    // 重新加载数据
+    loadCategory()
+    loadArticles()
+    // 滚动到顶部
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-)
+})
 </script>
 
 <style scoped>
@@ -307,7 +394,7 @@ watch(
   box-sizing: border-box;
 }
 
-.home-container {
+.category-detail-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   position: relative;
@@ -315,7 +402,7 @@ watch(
   flex-direction: column;
 }
 
-.home-container::before {
+.category-detail-container::before {
   content: '';
   position: fixed;
   top: 0;
@@ -344,6 +431,7 @@ watch(
   box-sizing: border-box;
 }
 
+/* Header */
 .el-header {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -383,12 +471,6 @@ watch(
   margin: 0;
 }
 
-.right-section {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
 .nav-menu a {
   text-decoration: none;
   color: #333;
@@ -415,6 +497,12 @@ watch(
 
 .nav-menu a:hover::after {
   width: 100%;
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .user-section {
@@ -456,13 +544,7 @@ watch(
   box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
 }
 
-.el-main {
-  padding: 30px 40px;
-  flex: 1;
-  width: 100%;
-  overflow-y: auto;
-}
-
+/* Main Content */
 .main-content {
   display: grid;
   grid-template-columns: 1fr 350px;
@@ -477,6 +559,69 @@ watch(
   max-width: 100%;
 }
 
+/* Category Info Card */
+.category-info-card {
+  margin-bottom: 20px;
+  border-radius: 16px;
+  border: none;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, rgba(74, 85, 104, 0.15) 0%, rgba(44, 62, 80, 0.15) 100%);
+  backdrop-filter: blur(10px);
+}
+
+.category-info-card :deep(.el-card__body) {
+  padding: 30px;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.category-icon {
+  font-size: 72px;
+  flex-shrink: 0;
+}
+
+.category-info {
+  flex: 1;
+}
+
+.category-title {
+  font-size: 36px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 12px 0;
+}
+
+.category-description {
+  font-size: 16px;
+  color: #606266;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+}
+
+.category-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #909399;
+}
+
+/* Article Cards */
 .article-card {
   margin-bottom: 20px;
   border-radius: 16px;
@@ -519,22 +664,14 @@ watch(
   margin-bottom: 15px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
-.article-meta span {
-  margin-right: 20px;
+.article-meta .meta-item {
   display: flex;
   align-items: center;
   gap: 5px;
-}
-
-.article-meta span::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  border-radius: 50%;
 }
 
 .article-summary {
@@ -557,9 +694,30 @@ watch(
   font-weight: 500;
 }
 
+/* Pagination */
+.el-pagination {
+  margin-top: 30px;
+  justify-content: center;
+}
+
+.el-pagination :deep(.el-pager li) {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.el-pagination :deep(.el-pager li.is-active) {
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
+}
+
+.el-pagination :deep(.btn-prev),
+.el-pagination :deep(.btn-next) {
+  border-radius: 8px;
+}
+
+/* Empty State */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 16px;
@@ -567,7 +725,7 @@ watch(
 }
 
 .empty-icon {
-  font-size: 64px;
+  font-size: 72px;
   margin-bottom: 20px;
   opacity: 0.5;
 }
@@ -578,11 +736,7 @@ watch(
   margin-bottom: 10px;
 }
 
-.empty-hint {
-  font-size: 14px;
-  color: #c0c4cc;
-}
-
+/* Sidebar */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -652,6 +806,15 @@ watch(
   transform: translateX(5px);
 }
 
+.category-list a.active {
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
+  color: white;
+}
+
+.category-list a.active:hover {
+  transform: translateX(0);
+}
+
 .category-list .count {
   background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   color: white;
@@ -659,6 +822,10 @@ watch(
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
+}
+
+.category-list a.active .count {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .tag-cloud {
@@ -682,6 +849,7 @@ watch(
   transform: scale(1.05);
 }
 
+/* Footer */
 .el-footer {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -692,25 +860,14 @@ watch(
   flex-shrink: 0;
 }
 
-.el-pagination {
-  margin-top: 30px;
-  justify-content: center;
+/* Skeleton */
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.el-pagination :deep(.el-pager li) {
-  border-radius: 8px;
-  font-weight: 500;
-}
-
-.el-pagination :deep(.el-pager li.is-active) {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-}
-
-.el-pagination :deep(.btn-prev),
-.el-pagination :deep(.btn-next) {
-  border-radius: 8px;
-}
-
+/* Responsive */
 @media (max-width: 1024px) {
   .main-content {
     grid-template-columns: 1fr 300px;
@@ -758,6 +915,24 @@ watch(
   .el-header {
     height: auto;
     min-height: 60px;
+  }
+
+  .category-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .category-icon {
+    font-size: 56px;
+  }
+
+  .category-title {
+    font-size: 28px;
+  }
+
+  .category-meta {
+    justify-content: center;
   }
 }
 </style>

@@ -77,11 +77,13 @@ public class ArticleController {
     @Operation(summary = "搜索文章")
     @GetMapping("/search")
     public Result<IPage<Article>> search(
-            @RequestParam String keyword,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long tagId) {
         Page<Article> pageParam = new Page<>(page, size);
-        IPage<Article> articlePage = articleService.searchArticles(pageParam, keyword);
+        IPage<Article> articlePage = articleService.searchArticles(pageParam, keyword, categoryId, tagId);
         return Result.success(articlePage);
     }
 

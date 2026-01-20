@@ -474,10 +474,9 @@ onMounted(() => {
 }
 
 .tag-page {
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
   position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -499,10 +498,9 @@ onMounted(() => {
 .el-container {
   position: relative;
   z-index: 1;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 /* Header */
@@ -623,28 +621,7 @@ onMounted(() => {
   padding: 30px 40px;
   flex: 1;
   width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   box-sizing: border-box;
-  min-height: 0;
-}
-
-.el-main::-webkit-scrollbar {
-  width: 8px;
-}
-
-.el-main::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.el-main::-webkit-scrollbar-thumb {
-  background: rgba(74, 85, 104, 0.3);
-  border-radius: 4px;
-}
-
-.el-main::-webkit-scrollbar-thumb:hover {
-  background: rgba(74, 85, 104, 0.5);
 }
 
 .main-content {

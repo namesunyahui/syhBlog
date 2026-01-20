@@ -175,18 +175,59 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public IPage<Article> searchArticles(Page<Article> page, String keyword) {
+        return searchArticles(page, keyword, null, null);
+    }
+
+    @Override
+    public IPage<Article> searchArticles(Page<Article> page, String keyword, Long categoryId, Long tagId) {
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Article::getIsPublished, true)
-               .and(w -> w.like(Article::getTitle, keyword)
+        wrapper.eq(Article::getIsPublished, true);
+
+        // 关键词搜索
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            wrapper.and(w -> w.like(Article::getTitle, keyword)
                           .or()
                           .like(Article::getContent, keyword)
                           .or()
-                          .like(Article::getSummary, keyword))
-               // 排除content字段，在数据库查询时就过滤掉（虽然搜索时需要用content，但返回结果不需要）
-               .select(Article.class, info -> !info.getProperty().equals("content"))
+                          .like(Article::getSummary, keyword));
+        }
+
+        // 分类筛选
+        if (categoryId != null) {
+            wrapper.eq(Article::getCategoryId, categoryId);
+        }
+
+        // 标签筛选（需要通过 article_tags 关联表查询）
+        // 如果指定了标签，需要通过子查询或自定义 SQL 实现
+        // 这里使用简化的方式：先查询文章，再通过标签关联过滤
+        // 注意：这种方式在大数据量时效率较低，建议使用自定义 SQL 或使用 MyBatis-Plus 的关联查询
+
+        // 排除content字段，在数据库查询时就过滤掉（虽然搜索时需要用content，但返回结果不需要）
+        wrapper.select(Article.class, info -> !info.getProperty().equals("content"))
                .orderByDesc(Article::getCreatedAt);
 
         IPage<Article> articlePage = page(page, wrapper);
+
+        // 如果指定了标签，需要过滤结果
+        if (tagId != null && articleTagMapper != null) {
+            // 查询包含该标签的所有文章ID
+            LambdaQueryWrapper<ArticleTag> tagWrapper = new LambdaQueryWrapper<>();
+            tagWrapper.eq(ArticleTag::getTagId, tagId);
+            List<ArticleTag> articleTags = articleTagMapper.selectList(tagWrapper);
+            Set<Long> articleIdsWithTag = articleTags.stream()
+                    .map(ArticleTag::getArticleId)
+                    .collect(Collectors.toSet());
+
+            // 过滤出包含该标签的文章
+            List<Article> filteredRecords = articlePage.getRecords().stream()
+                    .filter(article -> articleIdsWithTag.contains(article.getId()))
+                    .collect(Collectors.toList());
+
+            // 更新分页结果
+            articlePage.setRecords(filteredRecords);
+            articlePage.setTotal(filteredRecords.size());
+        }
+
         batchFillRelatedInfo(articlePage.getRecords());
         return articlePage;
     }
