@@ -3,6 +3,7 @@ package com.syh.blog.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.syh.blog.dto.ArchiveVO;
 import com.syh.blog.entity.Article;
 
 import java.util.List;
@@ -96,5 +97,15 @@ public interface ArticleService extends IService<Article> {
      * 获取相关文章（同分类或同标签的文章，排除当前文章）
      */
     List<Article> getRelatedArticles(Long articleId, Integer limit);
+
+    /**
+     * 获取按年月分组的归档数据
+     */
+    ArchiveVO getGroupedArchive();
+
+    /**
+     * 获取总浏览量
+     */
+    Long getTotalViewCount();
 }
 

@@ -70,3 +70,8 @@ export const deleteArticle = (id: number) => {
 export const publishArticle = (id: number, publish: boolean) => {
   return request.put(`/articles/${id}/publish`, { publish })
 }
+
+// 获取分组归档数据
+export const getGroupedArchive = () => {
+  return request.get('/articles/archive/grouped')
+}

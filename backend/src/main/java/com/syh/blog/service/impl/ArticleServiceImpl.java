@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.syh.blog.dto.ArchiveDTO;
+import com.syh.blog.dto.ArchiveVO;
+import com.syh.blog.dto.MonthArchive;
 import com.syh.blog.entity.Article;
 import com.syh.blog.entity.ArticleTag;
 import com.syh.blog.entity.Category;
@@ -19,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +92,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 排除content字段，在数据库查询时就过滤掉，减少内存占用和网络传输
         wrapper.select(Article.class, info -> !info.getProperty().equals("content"));
 
-        wrapper.orderByDesc(Article::getCreatedAt);
+        // 按创建时间降序排序（最新的文章在前）
+        wrapper.orderByDesc(true, Article::getCreatedAt);
 
         IPage<Article> articlePage = page(page, wrapper);
 
@@ -115,7 +121,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
 
         // 使用自定义查询方法
-        IPage<Article> articlePage = articleMapper.selectArticlesByTags(page, tagIds, tagIds.size());
+        IPage<Article> articlePage = this.baseMapper.selectArticlesByTags(page, tagIds, tagIds.size());
 
         // 批量填充分类和标签信息
         batchFillRelatedInfo(articlePage.getRecords());
@@ -134,31 +140,37 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public boolean incrementViewCount(Long id) {
+        // 直接更新数据库，简单可靠
+        boolean success = lambdaUpdate()
+                .eq(Article::getId, id)
+                .setSql("view_count = view_count + 1")
+                .update();
+
+        if (!success) {
+            System.err.println("增加浏览量失败: 文章ID " + id + " 不存在");
+        } else {
+            // 清除文章列表缓存，确保首页能显示最新的阅读量
+            clearArticleListCache();
+        }
+
+        return success;
+    }
+
+    /**
+     * 清除所有文章列表缓存
+     */
+    private void clearArticleListCache() {
         if (isRedisAvailable()) {
             try {
-                // 使用Redis计数器
-                String key = ARTICLE_VIEW_COUNT_KEY + id;
-                redisTemplate.opsForValue().increment(key);
-
-                // 同步到数据库的标志
-                String syncKey = ARTICLE_VIEW_COUNT_SYNC_KEY + id;
-                redisTemplate.opsForValue().set(syncKey, "1");
+                Set<String> keys = redisTemplate.keys(ARTICLE_LIST_CACHE_KEY + "*");
+                if (keys != null && !keys.isEmpty()) {
+                    redisTemplate.delete(keys);
+                    System.out.println("已清除 " + keys.size() + " 个文章列表缓存");
+                }
             } catch (Exception e) {
-                // Redis写入失败，直接更新数据库
-                System.err.println("Redis写入失败，直接更新数据库: " + e.getMessage());
-                lambdaUpdate()
-                        .eq(Article::getId, id)
-                        .setSql("view_count = view_count + 1")
-                        .update();
+                System.err.println("清除缓存失败: " + e.getMessage());
             }
-        } else {
-            // Redis不可用，直接更新数据库
-            lambdaUpdate()
-                    .eq(Article::getId, id)
-                    .setSql("view_count = view_count + 1")
-                    .update();
         }
-        return true;
     }
 
     @Override
@@ -261,6 +273,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 保存标签关联
         saveArticleTags(article.getId(), article.getTags());
 
+        // 清除文章列表缓存
+        clearArticleListCache();
+
         return article;
     }
 
@@ -286,13 +301,21 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             saveArticleTags(article.getId(), article.getTags());
         }
 
+        // 清除文章列表缓存
+        clearArticleListCache();
+
         return getById(article.getId());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteArticle(Long id) {
-        return removeById(id);
+        boolean result = removeById(id);
+        if (result) {
+            // 清除文章列表缓存
+            clearArticleListCache();
+        }
+        return result;
     }
 
     @Override
@@ -309,17 +332,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
 
         // 清除缓存
-        if (isRedisAvailable()) {
-            try {
-                // 清除所有文章列表缓存（因为缓存键包含 page:size:categoryId:tagId）
-                Set<String> keys = redisTemplate.keys(ARTICLE_LIST_CACHE_KEY + "*");
-                if (keys != null && !keys.isEmpty()) {
-                    redisTemplate.delete(keys);
-                }
-            } catch (Exception e) {
-                System.err.println("清除缓存失败: " + e.getMessage());
-            }
-        }
+        clearArticleListCache();
     }
 
     /**
@@ -500,5 +513,76 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 articleTagMapper.insert(articleTag);
             }
         }
+    }
+
+    @Override
+    public ArchiveVO getGroupedArchive() {
+        // 1. 查询所有已发布文章（排除content字段）
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Article::getIsPublished, true)
+               .select(Article.class, info -> !info.getColumn().equals("content"))
+               .orderByDesc(Article::getCreatedAt);
+
+        List<Article> allArticles = list(wrapper);
+
+        // 2. 批量填充分类和标签信息
+        batchFillRelatedInfo(allArticles);
+
+        // 3. 按年月分组
+        Map<Integer, Map<Integer, List<Article>>> grouped = allArticles.stream()
+            .collect(Collectors.groupingBy(
+                article -> article.getCreatedAt().getYear(),
+                LinkedHashMap::new,
+                Collectors.groupingBy(
+                    article -> article.getCreatedAt().getMonthValue(),
+                    LinkedHashMap::new,
+                    Collectors.toList()
+                )
+            ));
+
+        // 4. 构建归档VO
+        ArchiveVO archiveVO = new ArchiveVO();
+        archiveVO.setTotalCount(allArticles.size());
+
+        List<ArchiveDTO> archives = grouped.entrySet().stream()
+            .map(yearEntry -> {
+                ArchiveDTO archiveDTO = new ArchiveDTO();
+                archiveDTO.setYear(yearEntry.getKey());
+
+                List<MonthArchive> months = yearEntry.getValue().entrySet().stream()
+                    .map(monthEntry -> {
+                        MonthArchive monthArchive = new MonthArchive();
+                        monthArchive.setMonth(monthEntry.getKey());
+                        monthArchive.setCount(monthEntry.getValue().size());
+                        monthArchive.setArticles(monthEntry.getValue());
+                        return monthArchive;
+                    })
+                    .collect(Collectors.toList());
+
+                archiveDTO.setMonths(months);
+                return archiveDTO;
+            })
+            .collect(Collectors.toList());
+
+        archiveVO.setArchives(archives);
+
+        // 5. 添加统计信息
+        Map<String, Integer> stats = new HashMap<>();
+        stats.put("totalYears", archives.size());
+        stats.put("totalMonths", archives.stream()
+            .mapToInt(a -> a.getMonths().size())
+            .sum());
+        archiveVO.setStatistics(stats);
+
+        return archiveVO;
+    }
+
+    @Override
+    public Long getTotalViewCount() {
+        // 查询所有文章的浏览量总和
+        List<Article> articles = list();
+        return articles.stream()
+            .mapToLong(Article::getViewCount)
+            .sum();
     }
 }

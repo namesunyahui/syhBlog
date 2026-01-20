@@ -15,7 +15,6 @@
             #{tagId}
         </foreach>
         AND a.is_published = true
-        AND a.is_deleted = 0
         GROUP BY a.id
         HAVING COUNT(DISTINCT at.tag_id) = #{tagIdsSize}
         ORDER BY a.created_at DESC

@@ -47,7 +47,9 @@ spring:
   sql:
     init:
       schema-locations: classpath:schema.sql
-      mode: never
+#      mode: always # 每次启动应用都执行 SQL
+      mode: never  # 不自动执行 SQL（当前配置）
+#      mode: embedded  # 仅在使用嵌入式数据库（如 H2）时执行
       encoding: UTF-8
 
   # Redis配置（可选，如果未设置将自动禁用）

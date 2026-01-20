@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <el-row :gutter="20">
+    <el-row :gutter="20" v-loading="loading">
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
@@ -39,7 +39,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { getStats } from '@/api/admin'
 
+const loading = ref(false)
 const stats = ref({
   articleCount: 0,
   viewCount: 0,
@@ -47,8 +50,25 @@ const stats = ref({
   categoryCount: 0
 })
 
+const loadStats = async () => {
+  try {
+    loading.value = true
+    const response = await getStats()
+    if (response.code === 200) {
+      stats.value = response.data
+    } else {
+      ElMessage.error(response.message || '加载统计数据失败')
+    }
+  } catch (error) {
+    console.error('加载统计数据失败:', error)
+    ElMessage.error('加载统计数据失败')
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
-  // TODO: 加载统计数据
+  loadStats()
 })
 </script>
 

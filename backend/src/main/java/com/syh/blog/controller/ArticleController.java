@@ -3,6 +3,7 @@ package com.syh.blog.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.syh.blog.common.Result;
+import com.syh.blog.dto.ArchiveVO;
 import com.syh.blog.entity.Article;
 import com.syh.blog.service.ArticleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -92,6 +93,13 @@ public class ArticleController {
         Page<Article> pageParam = new Page<>(page, size);
         IPage<Article> articlePage = articleService.getArchiveList(pageParam);
         return Result.success(articlePage);
+    }
+
+    @Operation(summary = "获取按年月分组的归档文章")
+    @GetMapping("/archive/grouped")
+    public Result<ArchiveVO> getGroupedArchive() {
+        ArchiveVO archive = articleService.getGroupedArchive();
+        return Result.success(archive);
     }
 
     @Operation(summary = "获取热门文章")

@@ -155,8 +155,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getArticleList } from '@/api/article'
@@ -165,6 +165,7 @@ import { getTagList } from '@/api/tag'
 import { logout } from '@/api/auth'
 
 const router = useRouter()
+const route = useRoute()
 
 const articles = ref([])
 const categories = ref([])
@@ -289,6 +290,16 @@ onMounted(() => {
   loadTags()
   loadUserInfo()
 })
+
+// 监听路由变化，当返回首页时重新加载文章列表
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === '/') {
+      loadArticles()
+    }
+  }
+)
 </script>
 
 <style scoped>
