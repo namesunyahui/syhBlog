@@ -155,7 +155,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -176,12 +176,15 @@ const total = ref(0)
 const searchKeyword = ref('')
 const userInfo = ref<any>({})
 const loading = ref(true)
+const loginState = ref(!!localStorage.getItem('token'))
 
 const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
 
 // 检查登录状态
 const isLoggedIn = computed(() => {
-  return !!localStorage.getItem('token')
+  const token = localStorage.getItem('token')
+  const userInfo = localStorage.getItem('userInfo')
+  return loginState.value && !!(token && userInfo)
 })
 
 const loadArticles = async () => {
@@ -261,9 +264,14 @@ const handleLogout = async () => {
     })
 
     await logout()
+    // 先更新响应式状态
+    loginState.value = false
+    userInfo.value = {}
+    // 再清除 localStorage
     localStorage.removeItem('token')
     localStorage.removeItem('userInfo')
-    userInfo.value = {}
+    // 等待 DOM 更新
+    await nextTick()
     ElMessage.success('退出成功')
   } catch (error) {
     if (error !== 'cancel') {
