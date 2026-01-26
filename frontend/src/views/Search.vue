@@ -157,7 +157,9 @@
                 </span>
                 <span v-if="article.category" class="meta-item">
                   <el-icon><Folder /></el-icon>
-                  {{ article.category.name }}
+                  <router-link :to="`/category/${article.category.id}`" class="category-link">
+                    {{ article.category.name }}
+                  </router-link>
                 </span>
                 <span class="meta-item">
                   <el-icon><View /></el-icon>
@@ -446,21 +448,26 @@ onMounted(() => {
   padding: 0;
   width: 100%;
   flex-shrink: 0;
-  height: 70px;
+  height: 47px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
+  height: 47px;
   padding: 0 40px;
   gap: 60px;
   width: 100%;
 }
 
 .site-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: bold;
   background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   -webkit-background-clip: text;
@@ -552,7 +559,7 @@ onMounted(() => {
 }
 
 .el-main {
-  padding: 30px 40px;
+  padding: 67px 40px 20px 40px;
   flex: 1;
   width: 100%;
   box-sizing: border-box;
@@ -691,6 +698,18 @@ onMounted(() => {
   gap: 5px;
 }
 
+.meta-item .category-link {
+  text-decoration: none;
+  color: #4a5568;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.meta-item .category-link:hover {
+  color: #409eff;
+  text-decoration: underline;
+}
+
 .article-summary {
   color: #606266;
   line-height: 1.8;
@@ -782,7 +801,7 @@ onMounted(() => {
   }
 
   .site-title {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .nav-menu {
@@ -802,12 +821,12 @@ onMounted(() => {
   }
 
   .el-main {
-    padding: 15px 20px;
+    padding: 62px 20px 15px 20px;
   }
 
   .el-header {
     height: auto;
-    min-height: 60px;
+    min-height: 47px;
   }
 
   .filter-section {

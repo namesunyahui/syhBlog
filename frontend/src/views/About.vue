@@ -340,14 +340,19 @@ onMounted(() => {
   padding: 0;
   width: 100%;
   flex-shrink: 0;
-  height: 70px;
+  height: 47px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
+  height: 47px;
   padding: 0 40px;
   gap: 60px;
   width: 100%;
@@ -356,7 +361,7 @@ onMounted(() => {
 .site-title a {
   text-decoration: none;
   color: #4a5568;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
   display: block;
   background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
@@ -447,7 +452,7 @@ onMounted(() => {
 }
 
 .el-main {
-  padding: 40px 20px;
+  padding: 87px 20px 40px 20px;
   flex: 1;
   width: 100%;
   box-sizing: border-box;
@@ -696,7 +701,7 @@ onMounted(() => {
   }
 
   .site-title a {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .nav-menu {
@@ -717,7 +722,11 @@ onMounted(() => {
 
   .el-header {
     height: auto;
-    min-height: 60px;
+    min-height: 47px;
+  }
+
+  .el-main {
+    padding: 62px 20px 15px 20px;
   }
 
   .main-card :deep(.el-card__body) {

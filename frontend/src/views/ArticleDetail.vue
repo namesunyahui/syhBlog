@@ -70,14 +70,23 @@
 
               <div class="article-meta">
                 <span>{{ formatDate(article.createdAt) }}</span>
-                <span v-if="article.category">{{ article.category.name }}</span>
+                <span v-if="article.category">
+                  <router-link :to="`/category/${article.category.id}`" class="category-link">
+                    {{ article.category.name }}
+                  </router-link>
+                </span>
                 <span>{{ article.viewCount }} 阅读</span>
               </div>
 
               <div class="markdown-body" v-html="renderedContent"></div>
 
               <div class="article-tags" v-if="article.tags && article.tags.length">
-                <el-tag v-for="tag in article.tags" :key="tag.id">
+                <el-tag
+                  v-for="tag in article.tags"
+                  :key="tag.id"
+                  class="clickable-tag"
+                  @click="handleTagClick(tag.name)"
+                >
                   {{ tag.name }}
                 </el-tag>
               </div>
@@ -190,7 +199,11 @@
                 >
                   <div class="article-item-title">{{ item.title }}</div>
                   <div class="article-item-meta">
-                    <span v-if="item.category">{{ item.category.name }}</span>
+                    <span v-if="item.category">
+                      <router-link :to="`/category/${item.category.id}`" class="category-link">
+                        {{ item.category.name }}
+                      </router-link>
+                    </span>
                     <span>{{ item.viewCount }} 阅读</span>
                   </div>
                 </div>
@@ -372,6 +385,11 @@ const formatDate = (date: string) => {
   return new Date(date).toLocaleString('zh-CN')
 }
 
+// 标签点击处理
+const handleTagClick = (tagName: string) => {
+  router.push({ path: '/tag', query: { tag: tagName } })
+}
+
 // 跳转到登录页面
 const goToLogin = () => {
   router.push('/admin/login')
@@ -457,7 +475,7 @@ onMounted(() => {
 }
 
 .el-main {
-  padding: 20px 40px;
+  padding: 67px 40px 20px 40px;
   flex: 1;
   width: 100%;
   box-sizing: border-box;
@@ -470,21 +488,26 @@ onMounted(() => {
   padding: 0;
   width: 100%;
   flex-shrink: 0;
-  height: 70px;
+  height: 47px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
+  height: 47px;
   padding: 0 40px;
   gap: 60px;
   width: 100%;
 }
 
 .site-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: bold;
   background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   -webkit-background-clip: text;
@@ -653,6 +676,18 @@ onMounted(() => {
   border-radius: 50%;
 }
 
+.article-meta .category-link {
+  text-decoration: none;
+  color: #4a5568;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.article-meta .category-link:hover {
+  color: #409eff;
+  text-decoration: underline;
+}
+
 .markdown-body {
   line-height: 1.8;
   font-size: 16px;
@@ -701,6 +736,18 @@ onMounted(() => {
   border-color: transparent;
   color: #4a5568;
   font-weight: 500;
+}
+
+.article-tags .clickable-tag {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.article-tags .clickable-tag:hover {
+  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(74, 85, 104, 0.3);
 }
 
 .comments-section {
@@ -874,6 +921,18 @@ onMounted(() => {
   gap: 4px;
 }
 
+.article-item-meta .category-link {
+  text-decoration: none;
+  color: #4a5568;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.article-item-meta .category-link:hover {
+  color: #409eff;
+  text-decoration: underline;
+}
+
 .el-footer {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -893,7 +952,7 @@ onMounted(() => {
   }
 
   .el-main {
-    padding: 20px 20px;
+    padding: 62px 20px 20px 20px;
   }
 }
 
@@ -912,7 +971,7 @@ onMounted(() => {
   }
 
   .site-title {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .nav-menu {
@@ -933,7 +992,7 @@ onMounted(() => {
 
   .el-header {
     height: auto;
-    min-height: 60px;
+    min-height: 47px;
   }
 
   .article-title {
