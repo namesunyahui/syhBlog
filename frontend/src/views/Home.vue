@@ -70,7 +70,11 @@
                 </h2>
                 <div class="article-meta">
                   <span>{{ formatDate(article.createdAt) }}</span>
-                  <span v-if="article.category">{{ article.category.name }}</span>
+                  <span v-if="article.category">
+                    <router-link :to="`/category/${article.category.id}`" class="category-link">
+                      {{ article.category.name }}
+                    </router-link>
+                  </span>
                   <span>{{ article.viewCount }} 阅读</span>
                 </div>
                 <p class="article-summary">{{ article.summary }}</p>
@@ -114,7 +118,7 @@
               </template>
               <ul class="category-list" v-if="categories.length">
                 <li v-for="category in categories" :key="category.id">
-                  <router-link :to="`/category/${category.id}`">
+                  <router-link :to="{ path: '/category', query: { categoryId: category.id } }">
                     <span>{{ category.name }}</span>
                     <span class="count">{{ category.articleCount }}</span>
                   </router-link>
@@ -237,7 +241,7 @@ const handleSearch = () => {
 }
 
 const handleTagClick = (tagName: string) => {
-  router.push({ path: '/search', query: { tag: tagName } })
+  router.push({ path: '/tag', query: { tag: tagName } })
 }
 
 const formatDate = (date: string) => {
@@ -359,21 +363,26 @@ watch(
   padding: 0;
   width: 100%;
   flex-shrink: 0;
-  height: 70px;
+  height: 47px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
+  height: 47px;
   padding: 0 40px;
   gap: 60px;
   width: 100%;
 }
 
 .site-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: bold;
   background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   -webkit-background-clip: text;
@@ -465,7 +474,7 @@ watch(
 }
 
 .el-main {
-  padding: 30px 40px;
+  padding: 77px 40px 30px 40px;
   flex: 1;
   width: 100%;
   overflow-y: auto;
@@ -543,6 +552,18 @@ watch(
   height: 4px;
   background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   border-radius: 50%;
+}
+
+.article-meta .category-link {
+  text-decoration: none;
+  color: #4a5568;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.article-meta .category-link:hover {
+  color: #409eff;
+  text-decoration: underline;
 }
 
 .article-summary {
@@ -760,12 +781,12 @@ watch(
   }
 
   .el-main {
-    padding: 15px 20px;
+    padding: 62px 20px 15px 20px;
   }
 
   .el-header {
     height: auto;
-    min-height: 60px;
+    min-height: 47px;
   }
 }
 </style>

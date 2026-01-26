@@ -182,7 +182,7 @@
               </template>
               <ul class="category-list" v-if="categories.length">
                 <li v-for="category in categories" :key="category.id">
-                  <router-link :to="`/category/${category.id}`">
+                  <router-link :to="{ path: '/category', query: { categoryId: category.id } }">
                     <span>{{ category.name }}</span>
                     <span class="count">{{ category.articleCount }}</span>
                   </router-link>
@@ -223,8 +223,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { getCategoryList } from '@/api/category'
@@ -248,6 +248,7 @@ interface Article {
 }
 
 const router = useRouter()
+const route = useRoute()
 const categories = ref<Category[]>([])
 const articles = ref<Article[]>([])
 const tags = ref<any[]>([])
@@ -310,10 +311,14 @@ const handleCategoryClick = (category: Category) => {
     // 如果点击的是已选中的分类，则取消选中
     selectedCategoryId.value = null
     articles.value = []
+    // 清除 URL 查询参数
+    router.replace({ path: '/category', query: {} })
   } else {
     selectedCategoryId.value = category.id
     currentPage.value = 1
     loadArticles(1)
+    // 更新 URL 查询参数
+    router.replace({ path: '/category', query: { categoryId: category.id } })
   }
 }
 
@@ -321,6 +326,8 @@ const handleCategoryClick = (category: Category) => {
 const handleClearCategory = () => {
   selectedCategoryId.value = null
   articles.value = []
+  // 清除 URL 查询参数
+  router.replace({ path: '/category', query: {} })
 }
 
 // 分页变化
@@ -384,12 +391,42 @@ const handleSearch = () => {
 
 // 标签点击处理
 const handleTagClick = (tagName: string) => {
-  router.push({ path: '/search', query: { tag: tagName } })
+  router.push({ path: '/tag', query: { tag: tagName } })
 }
 
 onMounted(() => {
   loadCategories()
   loadTags()
+  // 检查 URL 查询参数，如果有 categoryId 则自动选中该分类
+  const categoryIdFromQuery = route.query.categoryId
+  if (categoryIdFromQuery) {
+    const categoryId = Number(categoryIdFromQuery)
+    // 延迟执行，确保分类列表已加载
+    setTimeout(() => {
+      const category = categories.value.find(c => c.id === categoryId)
+      if (category) {
+        selectedCategoryId.value = categoryId
+        loadArticles(1)
+      }
+    }, 100)
+  }
+})
+
+// 监听路由查询参数变化
+watch(() => route.query.categoryId, (newCategoryId) => {
+  if (newCategoryId) {
+    const categoryId = Number(newCategoryId)
+    const category = categories.value.find(c => c.id === categoryId)
+    if (category && selectedCategoryId.value !== categoryId) {
+      selectedCategoryId.value = categoryId
+      currentPage.value = 1
+      loadArticles(1)
+    }
+  } else {
+    // 查询参数被清除，重置状态
+    selectedCategoryId.value = null
+    articles.value = []
+  }
 })
 </script>
 
@@ -436,21 +473,26 @@ onMounted(() => {
   padding: 0;
   width: 100%;
   flex-shrink: 0;
-  height: 70px;
+  height: 47px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
+  height: 47px;
   padding: 0 40px;
   gap: 60px;
   width: 100%;
 }
 
 .site-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: bold;
   background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   -webkit-background-clip: text;
@@ -543,7 +585,7 @@ onMounted(() => {
 
 /* Main Content */
 .el-main {
-  padding: 30px 40px;
+  padding: 67px 40px 20px 40px;
   flex: 1;
   width: 100%;
   box-sizing: border-box;
@@ -920,7 +962,7 @@ onMounted(() => {
   }
 
   .site-title {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .nav-menu {
@@ -940,12 +982,12 @@ onMounted(() => {
   }
 
   .el-main {
-    padding: 15px 20px;
+    padding: 62px 20px 15px 20px;
   }
 
   .el-header {
     height: auto;
-    min-height: 60px;
+    min-height: 47px;
   }
 }
 

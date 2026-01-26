@@ -101,7 +101,9 @@
                     </span>
                     <span v-if="article.category" class="meta-item">
                       <el-icon><Folder /></el-icon>
-                      {{ article.category.name }}
+                      <router-link :to="`/category/${article.category.id}`" class="category-link">
+                        {{ article.category.name }}
+                      </router-link>
                     </span>
                     <span class="meta-item">
                       <el-icon><View /></el-icon>
@@ -152,7 +154,7 @@
               </template>
               <ul class="category-list" v-if="categories.length">
                 <li v-for="cat in categories" :key="cat.id">
-                  <router-link :to="`/category/${cat.id}`" :class="{ active: cat.id === Number(categoryId) }">
+                  <router-link :to="{ path: '/category', query: { categoryId: cat.id } }">
                     <span>{{ cat.name }}</span>
                     <span class="count">{{ cat.articleCount }}</span>
                   </router-link>
@@ -319,7 +321,7 @@ const handleSearch = () => {
 
 // 标签点击处理
 const handleTagClick = (tagName: string) => {
-  router.push({ path: '/search', query: { tag: tagName } })
+  router.push({ path: '/tag', query: { tag: tagName } })
 }
 
 // 跳转到登录页面
@@ -425,7 +427,7 @@ watch(() => route.params.id, (newId, oldId) => {
 }
 
 .el-main {
-  padding: 20px 40px;
+  padding: 67px 40px 20px 40px;
   flex: 1;
   width: 100%;
   box-sizing: border-box;
@@ -439,21 +441,26 @@ watch(() => route.params.id, (newId, oldId) => {
   padding: 0;
   width: 100%;
   flex-shrink: 0;
-  height: 70px;
+  height: 47px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
+  height: 47px;
   padding: 0 40px;
   gap: 60px;
   width: 100%;
 }
 
 .site-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: bold;
   background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
   -webkit-background-clip: text;
@@ -674,6 +681,18 @@ watch(() => route.params.id, (newId, oldId) => {
   gap: 5px;
 }
 
+.article-meta .category-link {
+  text-decoration: none;
+  color: #4a5568;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.article-meta .category-link:hover {
+  color: #409eff;
+  text-decoration: underline;
+}
+
 .article-summary {
   color: #606266;
   line-height: 1.8;
@@ -889,7 +908,7 @@ watch(() => route.params.id, (newId, oldId) => {
   }
 
   .site-title {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .nav-menu {
@@ -909,12 +928,12 @@ watch(() => route.params.id, (newId, oldId) => {
   }
 
   .el-main {
-    padding: 15px 20px;
+    padding: 62px 20px 15px 20px;
   }
 
   .el-header {
     height: auto;
-    min-height: 60px;
+    min-height: 47px;
   }
 
   .category-header {
