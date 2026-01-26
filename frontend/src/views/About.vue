@@ -47,14 +47,14 @@
         <div class="about-content">
           <el-card class="main-card">
             <div class="about-header">
-              <h1 class="about-title">关于 Syh Blog</h1>
-              <p class="about-subtitle">用心记录，用爱分享 ✨</p>
+              <h1 class="about-title">关于我</h1>
+              <p class="about-subtitle">很高兴遇见你 ✨</p>
             </div>
 
             <div class="about-section">
-              <h2>📖 项目介绍</h2>
-              <p>Syh Blog 是一个现代化的全栈个人博客系统，采用前后端分离架构开发。系统提供了完整的博客功能，包括文章管理、分类标签、评论互动、搜索归档等特性。</p>
-              <p>项目旨在为个人博主提供一个简洁、高效、美观的写作与分享平台，同时具备良好的用户体验和性能表现。</p>
+              <h2>👋 你好呀！</h2>
+              <p>欢迎来到我的小天地。这里是 Syh Blog，一个承载我思考和记录的角落。</p>
+              <p>我会在这里分享技术学习笔记、生活感悟和一些碎碎念。希望这些文字能给你带来一些启发和帮助。</p>
             </div>
 
             <div class="about-section">
@@ -132,100 +132,67 @@
             </div>
 
             <div class="about-section">
-              <h2>✨ 主要特性</h2>
+              <h2>✨ 我能帮你做什么？</h2>
               <ul class="feature-list">
                 <li>
                   <span class="feature-icon">📝</span>
                   <div class="feature-content">
-                    <h4>文章管理</h4>
-                    <p>支持 Markdown 编辑，分类标签管理，文章发布与草稿</p>
+                    <h4>陪你阅读</h4>
+                    <p>这里收录了我的学习笔记、技术总结和生活感悟，随时欢迎你来逛逛</p>
                   </div>
                 </li>
                 <li>
                   <span class="feature-icon">💬</span>
                   <div class="feature-content">
-                    <h4>评论系统</h4>
-                    <p>访客评论功能，支持昵称和邮箱，互动交流</p>
+                    <h4>倾听声音</h4>
+                    <p>每篇文章都期待你的声音，无论是赞同还是质疑，我很乐意和你交流</p>
                   </div>
                 </li>
                 <li>
                   <span class="feature-icon">🔍</span>
                   <div class="feature-content">
-                    <h4>搜索功能</h4>
-                    <p>全文搜索，快速找到感兴趣的文章</p>
+                    <h4>帮你找东西</h4>
+                    <p>在海量的文字中迷失了？用搜索功能，帮你快速找到感兴趣的内容</p>
                   </div>
                 </li>
                 <li>
-                  <span class="feature-icon">📊</span>
+                  <span class="feature-icon">📂</span>
                   <div class="feature-content">
-                    <h4>数据统计</h4>
-                    <p>文章浏览量统计，访客记录，数据分析</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="feature-icon">🎨</span>
-                  <div class="feature-content">
-                    <h4>响应式设计</h4>
-                    <p>完美适配桌面端和移动端，优雅的渐变配色</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="feature-icon">🔒</span>
-                  <div class="feature-content">
-                    <h4>安全可靠</h4>
-                    <p>JWT 认证，密码加密，权限控制，数据安全有保障</p>
+                    <h4>整理归档</h4>
+                    <p>按主题分类，贴好标签，让知识更有序。或者按时间浏览，看看成长轨迹</p>
                   </div>
                 </li>
               </ul>
             </div>
 
             <div class="about-section">
-              <h2>🎯 核心功能</h2>
-              <div class="feature-grid">
-                <div class="feature-card">
-                  <div class="feature-card-icon">📂</div>
-                  <h4>分类管理</h4>
-                  <p>文章分类归档，结构清晰</p>
-                </div>
-                <div class="feature-card">
-                  <div class="feature-card-icon">🏷️</div>
-                  <h4>标签系统</h4>
-                  <p>多标签管理，便于检索</p>
-                </div>
-                <div class="feature-card">
-                  <div class="feature-card-icon">📦</div>
-                  <h4>归档浏览</h4>
-                  <p>时间轴展示文章列表</p>
-                </div>
-                <div class="feature-card">
-                  <div class="feature-card-icon">👁️</div>
-                  <h4>浏览统计</h4>
-                  <p>实时统计文章阅读量</p>
-                </div>
-                <div class="feature-card">
-                  <div class="feature-card-icon">⚙️</div>
-                  <h4>后台管理</h4>
-                  <p>强大的管理后台系统</p>
-                </div>
-                <div class="feature-card">
-                  <div class="feature-card-icon">📱</div>
-                  <h4>移动适配</h4>
-                  <p>完美支持移动端访问</p>
-                </div>
+              <h2>💻 关于技术</h2>
+              <div class="design-philosophy">
+                <p>这个博客是用 <strong>Vue 3</strong> 和 <strong>Spring Boot</strong> 搭建的。选择这些技术，是因为它们足够灵活、高效，让我能专注于内容创作本身。</p>
+                <p>如果你对技术细节感兴趣，欢迎去我的 GitHub 看看，代码都是开源的 😊</p>
               </div>
             </div>
 
             <div class="about-section">
-              <h2>💡 设计理念</h2>
-              <div class="design-philosophy">
-                <p>Syh Blog 遵循<strong>简约而不简单</strong>的设计理念，注重用户体验和内容呈现。界面采用现代化的渐变色设计，搭配卡片式布局，让阅读成为一种享受。</p>
-                <p>在技术上，我们采用最新的技术栈和最佳实践，确保系统的性能、安全性和可维护性。前后端分离的架构使得系统更加灵活，易于扩展。</p>
+              <h2>📮 找到我</h2>
+              <div class="contact-grid">
+                <div class="contact-card">
+                  <div class="contact-icon">🐙</div>
+                  <h4>GitHub</h4>
+                  <p>github.com/namesunyahui</p>
+                </div>
+                <div class="contact-card">
+                  <div class="contact-icon">📧</div>
+                  <h4>邮箱</h4>
+                  <p>sunyahui2026@163.com</p>
+                </div>
               </div>
             </div>
 
             <div class="about-footer">
-              <p>© 2025 Syh Blog. 用心记录，用爱分享 ✨</p>
-              <p>技术改变世界，代码创造价值</p>
+              <p>感谢你的来访 🙏</p>
+              <p>希望这里的某些文字，能在某个时刻，给你带来一丝温暖或启发</p>
+              <p class="signature">—— Syh</p>
             </div>
           </el-card>
         </div>
@@ -691,6 +658,55 @@ onMounted(() => {
   margin-bottom: 0;
 }
 
+.about-footer .signature {
+  font-size: 16px;
+  color: #4a5568;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* 联系方式网格 */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.contact-card {
+  text-align: center;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(74, 85, 104, 0.1);
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(74, 85, 104, 0.2);
+  border-color: rgba(74, 85, 104, 0.3);
+}
+
+.contact-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.contact-card h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 10px;
+}
+
+.contact-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #606266;
+  word-break: break-all;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .header-content {
@@ -752,6 +768,10 @@ onMounted(() => {
   .feature-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
@@ -780,6 +800,10 @@ onMounted(() => {
   }
 
   .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-grid {
     grid-template-columns: 1fr;
   }
 
