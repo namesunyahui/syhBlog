@@ -129,13 +129,13 @@
       class="form-dialog">
       <el-form label-width="100px" class="luxury-form">
         <el-form-item label="用户名">
-          <el-input v-model="currentUser.username" disabled />
+          <el-input v-model="currentUser.username" disabled class="luxury-input" />
         </el-form-item>
         <el-form-item label="昵称">
-          <el-input v-model="currentUser.nickname" disabled />
+          <el-input v-model="currentUser.nickname" disabled class="luxury-input" />
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="newRole" placeholder="请选择角色" class="filter-select">
+          <el-select v-model="newRole" placeholder="请选择角色" class="luxury-select">
             <el-option label="管理员" value="ADMIN" />
             <el-option label="超级管理员" value="SUPER_ADMIN" />
           </el-select>
@@ -608,27 +608,230 @@ onMounted(() => {
 
 /* ==================== 对话框 ==================== */
 .form-dialog :deep(.el-dialog) {
-  background: rgba(20, 20, 20, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(20, 20, 20, 0.98) 0%, rgba(15, 15, 15, 0.95) 100%);
+  backdrop-filter: blur(30px);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  border-radius: 20px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(212, 175, 55, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.form-dialog :deep(.el-dialog)::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .form-dialog :deep(.el-dialog__header) {
-  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  border-bottom: none;
+  padding: 30px 30px 20px 30px;
+  margin: 0;
+  position: relative;
+  background: transparent;
+}
+
+.form-dialog :deep(.el-dialog__header)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #d4af37 50%, transparent 100%);
+  opacity: 0.5;
 }
 
 .form-dialog :deep(.el-dialog__title) {
   color: #f4e4bc;
   font-family: 'Playfair Display', 'Times New Roman', serif;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-align: center;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding-bottom: 15px;
+  position: relative;
+}
+
+.form-dialog :deep(.el-dialog__title)::before {
+  content: '✦';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  color: #d4af37;
+  font-size: 16px;
+}
+
+.form-dialog :deep(.el-dialog__headerbtn) {
+  top: 25px;
+  right: 25px;
+  width: 32px;
+  height: 32px;
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.form-dialog :deep(.el-dialog__headerbtn:hover) {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.form-dialog :deep(.el-dialog__close) {
+  color: rgba(244, 228, 188, 0.7);
+  font-size: 18px;
+}
+
+.form-dialog :deep(.el-dialog__headerbtn:hover .el-dialog__close) {
+  color: #f4e4bc;
+}
+
+.form-dialog :deep(.el-dialog__body) {
+  padding: 30px;
+}
+
+.form-dialog :deep(.el-dialog__footer) {
+  border-top: none;
+  padding: 0 30px 30px 30px;
+  display: flex;
+  justify-content: center;
 }
 
 .luxury-form :deep(.el-form-item__label) {
-  color: rgba(244, 228, 188, 0.8);
+  color: rgba(244, 228, 188, 0.85);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.5px;
 }
 
-.filter-select {
+.luxury-form :deep(.el-form-item) {
+  margin-bottom: 26px;
+}
+
+.luxury-input :deep(.el-input__wrapper),
+.luxury-textarea :deep(.el-textarea__inner),
+.luxury-select :deep(.el-select__wrapper) {
+  background: rgba(26, 26, 26, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: none;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.luxury-input :deep(.el-input__wrapper):hover,
+.luxury-input :deep(.el-input__wrapper.is-focus),
+.luxury-textarea :deep(.el-textarea__inner):hover,
+.luxury-textarea :deep(.el-textarea__inner:focus),
+.luxury-select :deep(.el-select__wrapper):hover,
+.luxury-select :deep(.el-select__wrapper.is-focused) {
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(26, 26, 26, 0.9);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+}
+
+.luxury-input :deep(.el-input__inner),
+.luxury-textarea :deep(.el-textarea__inner) {
+  color: rgba(244, 228, 188, 0.95);
+  font-size: 14px;
+}
+
+.luxury-input :deep(.el-input__inner):disabled {
+  color: rgba(244, 228, 188, 0.5);
+  -webkit-text-fill-color: rgba(244, 228, 188, 0.5);
+}
+
+.luxury-input :deep(.el-input__inner::placeholder),
+.luxury-textarea :deep(.el-textarea__inner::placeholder) {
+  color: rgba(244, 228, 188, 0.35);
+}
+
+.luxury-select {
   width: 100%;
+}
+
+.luxury-select :deep(.el-select__selected-item) {
+  color: rgba(244, 228, 188, 0.95);
+}
+
+.luxury-select :deep(.el-select__placeholder) {
+  color: rgba(244, 228, 188, 0.35);
+}
+
+/* 下拉框图标 */
+.luxury-select :deep(.el-select__caret),
+.filter-select :deep(.el-select__caret) {
+  color: rgba(212, 175, 55, 0.7);
+}
+
+/* 下拉弹出菜单 */
+:deep(.el-select-dropdown) {
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.96)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(212, 175, 55, 0.1),
+    0 0 20px rgba(212, 175, 55, 0.05) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(20px) !important;
+  padding: 8px !important;
+}
+
+/* 下拉选项 */
+:deep(.el-select-dropdown__item) {
+  color: rgba(244, 228, 188, 0.85) !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  margin: 2px 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.el-select-dropdown__item:hover) {
+  background: rgba(212, 175, 55, 0.15) !important;
+  color: #f4e4bc !important;
+}
+
+:deep(.el-select-dropdown__item.is-selected) {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.15) 100%) !important;
+  color: #f4e4bc !important;
+  font-weight: 500 !important;
+}
+
+:deep(.el-select-dropdown__item.is-selected:hover) {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0.25) 100%) !important;
+}
+
+/* 多选标签 */
+:deep(.el-tag) {
+  background: rgba(212, 175, 55, 0.15) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  color: #f4e4bc !important;
+}
+
+:deep(.el-tag__close) {
+  color: rgba(244, 228, 188, 0.7) !important;
+}
+
+:deep(.el-tag__close:hover) {
+  color: #f4e4bc !important;
+  background: rgba(212, 175, 55, 0.2) !important;
 }
 
 .filter-select :deep(.el-select__wrapper) {
@@ -640,53 +843,49 @@ onMounted(() => {
 .filter-select :deep(.el-select__wrapper:hover),
 .filter-select :deep(.el-select__wrapper.is-focused) {
   border-color: rgba(212, 175, 55, 0.4);
+  background: rgba(26, 26, 26, 0.8);
 }
 
-.luxury-form :deep(.el-input__wrapper),
-.luxury-form :deep(.el-textarea__inner) {
-  background: rgba(26, 26, 26, 0.6);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  box-shadow: none;
-}
-
-.luxury-form :deep(.el-input__wrapper):hover,
-.luxury-form :deep(.el-input__wrapper.is-focus),
-.luxury-form :deep(.el-textarea__inner):hover,
-.luxury-form :deep(.el-textarea__inner:focus) {
-  border-color: rgba(212, 175, 55, 0.4);
-}
-
-.luxury-form :deep(.el-input__inner),
-.luxury-form :deep(.el-textarea__inner) {
-  color: rgba(244, 228, 188, 0.9);
+.filter-select :deep(.el-select__placeholder) {
+  color: rgba(244, 228, 188, 0.35);
 }
 
 .dialog-footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  justify-content: center;
+  gap: 16px;
 }
 
 .dialog-btn {
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-weight: 500;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
   transition: all 0.3s ease;
+  letter-spacing: 0.5px;
 }
 
 .dialog-btn.primary {
   background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%);
   color: #0a0a0a;
   border: none;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.dialog-btn.primary:hover {
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px);
 }
 
 .dialog-btn.secondary {
-  background: transparent;
+  background: rgba(212, 175, 55, 0.1);
   color: #f4e4bc;
   border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-.dialog-btn:hover {
+.dialog-btn.secondary:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.5);
   transform: translateY(-2px);
 }
 
@@ -704,5 +903,14 @@ onMounted(() => {
   .action-btn {
     flex: 1;
   }
+}
+</style>
+
+<style>
+/* 全局遮罩层样式 - 确保暗色背景 */
+.form-dialog + .el-overlay,
+.form-dialog ~ .el-overlay {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(4px);
 }
 </style>

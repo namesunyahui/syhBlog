@@ -412,6 +412,7 @@ onMounted(() => {
 .filter-input :deep(.el-input__wrapper.is-focus),
 .filter-select :deep(.el-select__wrapper.is-focused) {
   border-color: rgba(212, 175, 55, 0.4);
+  background: rgba(26, 26, 26, 0.8);
 }
 
 .filter-input :deep(.el-input__inner),
@@ -421,6 +422,72 @@ onMounted(() => {
 
 .filter-input :deep(.el-input__inner::placeholder) {
   color: rgba(244, 228, 188, 0.4);
+}
+
+/* ==================== 暗色奢华风格下拉框 ==================== */
+.filter-select :deep(.el-select__placeholder),
+.luxury-select :deep(.el-select__placeholder) {
+  color: rgba(244, 228, 188, 0.35);
+}
+
+/* 下拉框图标 */
+.filter-select :deep(.el-select__caret),
+.luxury-select :deep(.el-select__caret) {
+  color: rgba(212, 175, 55, 0.7);
+}
+
+/* 下拉弹出菜单 */
+:deep(.el-select-dropdown) {
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.96)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(212, 175, 55, 0.1),
+    0 0 20px rgba(212, 175, 55, 0.05) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(20px) !important;
+  padding: 8px !important;
+}
+
+/* 下拉选项 */
+:deep(.el-select-dropdown__item) {
+  color: rgba(244, 228, 188, 0.85) !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  margin: 2px 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.el-select-dropdown__item:hover) {
+  background: rgba(212, 175, 55, 0.15) !important;
+  color: #f4e4bc !important;
+}
+
+:deep(.el-select-dropdown__item.is-selected) {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.15) 100%) !important;
+  color: #f4e4bc !important;
+  font-weight: 500 !important;
+}
+
+:deep(.el-select-dropdown__item.is-selected:hover) {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0.25) 100%) !important;
+}
+
+/* 多选标签 */
+:deep(.el-tag) {
+  background: rgba(212, 175, 55, 0.15) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  color: #f4e4bc !important;
+}
+
+:deep(.el-tag__close) {
+  color: rgba(244, 228, 188, 0.7) !important;
+}
+
+:deep(.el-tag__close:hover) {
+  color: #f4e4bc !important;
+  background: rgba(212, 175, 55, 0.2) !important;
 }
 
 .filter-actions {
@@ -768,64 +835,94 @@ onMounted(() => {
 
 /* ==================== 预览对话框 ==================== */
 .preview-dialog :deep(.el-dialog) {
-  background: linear-gradient(145deg, rgba(20, 20, 20, 0.98) 0%, rgba(15, 15, 15, 0.95) 100%);
-  backdrop-filter: blur(30px);
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.96) 100%);
+  backdrop-filter: blur(40px);
   border: 2px solid transparent;
   background-clip: padding-box;
   position: relative;
-  border-radius: 20px;
+  border-radius: 24px;
   box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(212, 175, 55, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 25px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(212, 175, 55, 0.15),
+    0 0 40px rgba(212, 175, 55, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: visible;
+  z-index: 9999 !important;
 }
 
+/* 确保遮罩层也在最高层级 */
+.preview-dialog :deep(.el-overlay) {
+  z-index: 9998 !important;
+}
+
+/* 对话框金色流光边框 */
 .preview-dialog :deep(.el-dialog)::before {
   content: '';
   position: absolute;
   inset: -2px;
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 2px;
-  background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
+  background: linear-gradient(135deg,
+    #d4af37 0%,
+    #f4e4bc 25%,
+    #d4af37 50%,
+    #b8962e 75%,
+    #d4af37 100%);
+  background-size: 300% 300%;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: 0.3;
+  opacity: 0.4;
   pointer-events: none;
+  z-index: -1;
+  animation: borderFlow 6s ease infinite;
+}
+
+@keyframes borderFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .preview-dialog :deep(.el-dialog__header) {
   border-bottom: none;
-  padding: 30px 30px 20px 30px;
+  padding: 32px 32px 24px 32px;
   margin: 0;
   position: relative;
+  background: transparent;
 }
 
+/* 标题底部分隔线 */
 .preview-dialog :deep(.el-dialog__header)::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 30px;
-  right: 30px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, #d4af37 50%, transparent 100%);
-  opacity: 0.5;
+  left: 32px;
+  right: 32px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.6) 20%,
+    #d4af37 50%,
+    rgba(212, 175, 55, 0.6) 80%,
+    transparent 100%);
 }
 
 .preview-dialog :deep(.el-dialog__title) {
   color: #f4e4bc;
   font-family: 'Playfair Display', 'Times New Roman', serif;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-align: center;
   display: block;
   width: 100%;
   margin: 0;
-  padding-bottom: 15px;
+  padding-bottom: 18px;
   position: relative;
+  text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
 }
 
+/* 标题装饰星标 */
 .preview-dialog :deep(.el-dialog__title)::before {
   content: '✦';
   position: absolute;
@@ -833,16 +930,47 @@ onMounted(() => {
   bottom: 0;
   transform: translateX(-50%);
   color: #d4af37;
-  font-size: 16px;
+  font-size: 18px;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+}
+
+.preview-dialog :deep(.el-dialog__headerbtn) {
+  top: 24px;
+  right: 24px;
+  width: 36px;
+  height: 36px;
+  background: rgba(212, 175, 55, 0.12);
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.preview-dialog :deep(.el-dialog__headerbtn:hover) {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.5);
+  transform: rotate(90deg);
+}
+
+.preview-dialog :deep(.el-dialog__close) {
+  color: rgba(244, 228, 188, 0.75);
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.preview-dialog :deep(.el-dialog__headerbtn:hover .el-dialog__close) {
+  color: #f4e4bc;
+  text-shadow: 0 0 10px rgba(244, 228, 188, 0.5);
 }
 
 .preview-dialog :deep(.el-dialog__body) {
-  padding: 30px;
+  padding: 32px 32px 28px 32px;
 }
 
 .preview-dialog :deep(.el-dialog__footer) {
   border-top: none;
-  padding: 0 30px 30px 30px;
+  padding: 0 32px 32px 32px;
+  display: flex;
+  justify-content: center;
 }
 
 .preview-container {
@@ -960,43 +1088,87 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-.dialog-footer {
+/* ==================== 预览对话框按钮 ==================== */
+.preview-dialog .dialog-footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 16px;
+  justify-content: center;
+  gap: 18px;
+  padding-top: 8px;
 }
 
-.dialog-btn {
-  padding: 12px 32px;
-  border-radius: 10px;
+.preview-dialog .dialog-btn {
+  padding: 13px 36px;
+  border-radius: 12px;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.3s ease;
-  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.8px;
+  min-width: 120px;
+  position: relative;
+  overflow: hidden;
 }
 
-.dialog-btn.primary {
-  background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%);
+.preview-dialog .dialog-btn.primary {
+  background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
+  background-size: 200% 200%;
   color: #0a0a0a;
   border: none;
-  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  box-shadow:
+    0 4px 20px rgba(212, 175, 55, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.dialog-btn.primary:hover {
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-  transform: translateY(-2px);
+.preview-dialog .dialog-btn.primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent);
+  transition: left 0.6s ease;
 }
 
-.dialog-btn.secondary {
-  background: rgba(212, 175, 55, 0.1);
+.preview-dialog .dialog-btn.primary:hover {
+  box-shadow:
+    0 6px 25px rgba(212, 175, 55, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-3px);
+  background-position: 100% 50%;
+}
+
+.preview-dialog .dialog-btn.primary:hover::before {
+  left: 100%;
+}
+
+.preview-dialog .dialog-btn.primary:active {
+  transform: translateY(-1px);
+}
+
+.preview-dialog .dialog-btn.secondary {
+  background: rgba(212, 175, 55, 0.12);
   color: #f4e4bc;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(212, 175, 55, 0.32);
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.dialog-btn.secondary:hover {
-  background: rgba(212, 175, 55, 0.15);
-  border-color: rgba(212, 175, 55, 0.5);
-  transform: translateY(-2px);
+.preview-dialog .dialog-btn.secondary:hover {
+  background: rgba(212, 175, 55, 0.18);
+  border-color: rgba(212, 175, 55, 0.55);
+  box-shadow:
+    0 4px 15px rgba(212, 175, 55, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(-3px);
+  text-shadow: 0 0 8px rgba(244, 228, 188, 0.3);
+}
+
+.preview-dialog .dialog-btn.secondary:active {
+  transform: translateY(-1px);
 }
 
 /* ==================== 响应式 ==================== */
@@ -1027,6 +1199,59 @@ onMounted(() => {
 
   .action-buttons {
     flex-wrap: wrap;
+  }
+}
+</style>
+
+<style>
+/* ==================== 全局对话框样式覆盖 ==================== */
+
+/* 强制覆盖 Element Plus 对话框默认白色背景 */
+.el-dialog {
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.96) 100%) !important;
+  backdrop-filter: blur(40px) !important;
+}
+
+/* 确保对话框头部、主体、底部都是透明或暗色背景 */
+.el-dialog__header,
+.el-dialog__body,
+.el-dialog__footer {
+  background: transparent !important;
+}
+
+/* ==================== 全局遮罩层样式 ==================== */
+/* 确保暗色背景，增强视觉层次 */
+.preview-dialog + .el-overlay,
+.preview-dialog ~ .el-overlay,
+.form-dialog + .el-overlay,
+.form-dialog ~ .el-overlay,
+.detail-dialog + .el-overlay,
+.detail-dialog ~ .el-overlay,
+.el-overlay {
+  background-color: rgba(0, 0, 0, 0.82) !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 9998 !important;
+}
+
+/* 确保对话框在最上层 */
+.el-dialog__wrapper {
+  z-index: 9999 !important;
+}
+
+/* 遮罩层动画效果 */
+.preview-dialog + .el-overlay,
+.preview-dialog ~ .el-overlay {
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
   }
 }
 </style>

@@ -877,3 +877,12 @@ onMounted(() => {
   }
 }
 </style>
+
+<style>
+/* 全局遮罩层样式 - 确保暗色背景 */
+.detail-dialog + .el-overlay,
+.detail-dialog ~ .el-overlay {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(4px);
+}
+</style>

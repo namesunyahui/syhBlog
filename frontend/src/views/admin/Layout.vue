@@ -125,6 +125,9 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
+/* ==================== 全局字体导入 ==================== */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
 /* ==================== 基础布局 ==================== */
 .admin-layout {
   height: 100vh;
@@ -506,7 +509,4 @@ const handleLogout = async () => {
   min-height: 100%;
   padding: 24px 32px;
 }
-
-/* ==================== 全局字体导入 ==================== */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 </style>

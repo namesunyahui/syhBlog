@@ -52,7 +52,7 @@
       class="form-dialog">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="luxury-form">
         <el-form-item label="标签名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入标签名称" />
+          <el-input v-model="form.name" placeholder="请输入标签名称" class="luxury-input" />
         </el-form-item>
       </el-form>
 
@@ -539,5 +539,14 @@ onMounted(() => {
   background: rgba(212, 175, 55, 0.15);
   border-color: rgba(212, 175, 55, 0.5);
   transform: translateY(-2px);
+}
+</style>
+
+<style>
+/* 全局遮罩层样式 - 确保暗色背景 */
+.form-dialog + .el-overlay,
+.form-dialog ~ .el-overlay {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(4px);
 }
 </style>

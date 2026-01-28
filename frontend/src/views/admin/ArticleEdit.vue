@@ -443,10 +443,62 @@ onMounted(() => {
   color: rgba(244, 228, 188, 0.35);
 }
 
+/* 下拉框图标 */
+.luxury-select :deep(.el-select__caret) {
+  color: rgba(212, 175, 55, 0.7);
+}
+
 .luxury-select :deep(.el-tag) {
   background: rgba(212, 175, 55, 0.15) !important;
   border-color: rgba(212, 175, 55, 0.3) !important;
   color: #f4e4bc !important;
+}
+
+.luxury-select :deep(.el-tag__close) {
+  color: rgba(244, 228, 188, 0.7) !important;
+}
+
+.luxury-select :deep(.el-tag__close:hover) {
+  color: #f4e4bc !important;
+  background: rgba(212, 175, 55, 0.2) !important;
+}
+
+/* 下拉弹出菜单 */
+:deep(.el-select-dropdown) {
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.96)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(212, 175, 55, 0.1),
+    0 0 20px rgba(212, 175, 55, 0.05) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(20px) !important;
+  padding: 8px !important;
+}
+
+/* 下拉选项 */
+:deep(.el-select-dropdown__item) {
+  color: rgba(244, 228, 188, 0.85) !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  margin: 2px 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.el-select-dropdown__item:hover) {
+  background: rgba(212, 175, 55, 0.15) !important;
+  color: #f4e4bc !important;
+}
+
+:deep(.el-select-dropdown__item.is-selected) {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.15) 100%) !important;
+  color: #f4e4bc !important;
+  font-weight: 500 !important;
+}
+
+:deep(.el-select-dropdown__item.is-selected:hover) {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0.25) 100%) !important;
 }
 
 /* 内容编辑区 */
