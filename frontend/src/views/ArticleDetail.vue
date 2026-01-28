@@ -1,240 +1,238 @@
 <template>
-  <div class="article-detail-container">
-    <el-container>
-      <el-header>
-        <div class="header-content">
-          <h1 class="site-title">Syh Blog</h1>
-          <nav class="nav-menu">
-            <router-link to="/">🏠 首页</router-link>
-            <router-link to="/category">📂 分类</router-link>
-            <router-link to="/tag">🏷️ 标签</router-link>
-            <router-link to="/archive">📦 归档</router-link>
-            <router-link to="/about">👤 关于</router-link>
-          </nav>
-          <div class="right-section">
-            <div class="user-section">
-              <template v-if="isLoggedIn">
-                <el-dropdown>
-                  <span class="user-info">
-                    <el-avatar :size="32" :src="userInfo.avatar || defaultAvatar" />
-                    <span class="username">{{ userInfo.nickname || '管理员' }}</span>
-                  </span>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item @click="goToAdmin">
-                        🎯 管理后台
-                      </el-dropdown-item>
-                      <el-dropdown-item divided @click="handleLogout">
-                        🚪 退出登录
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </template>
-              <template v-else>
-                <el-button type="primary" @click="goToLogin" class="login-btn">
-                  🔐 登录
-                </el-button>
-              </template>
-            </div>
-          </div>
-        </div>
-      </el-header>
+  <div class="article-detail-page">
+    <AppHeader />
 
-      <el-main>
-        <div class="main-content">
+    <main class="main-content">
+      <div class="content-container">
+        <!-- 左侧文章内容 -->
+        <div class="content-left">
           <!-- 加载状态 -->
           <div v-if="loading" class="loading-container">
-            <el-skeleton animated>
-              <template #template>
-                <el-skeleton-item variant="rect" style="width: 100%; height: 400px; margin-bottom: 20px; border-radius: 16px;" />
-              </template>
-            </el-skeleton>
+            <div class="skeleton-title skeleton"></div>
+            <div class="skeleton-meta skeleton"></div>
+            <div class="skeleton-content skeleton"></div>
           </div>
 
-          <!-- 加载失败提示 -->
-          <el-alert
-            v-else-if="error"
-            title="加载失败"
-            :description="error"
-            type="error"
-            show-icon
-            :closable="false"
-            class="error-alert"
-          />
+          <!-- 加载失败 -->
+          <div v-else-if="error" class="error-state">
+            <div class="error-icon">⚠️</div>
+            <h3 class="error-title">{{ error }}</h3>
+          </div>
 
-          <!-- 左侧文章内容 -->
-          <div class="article-list" v-else-if="article">
-            <el-card>
+          <!-- 文章内容 -->
+          <article v-else-if="article" class="article-content">
+            <!-- 文章头部 -->
+            <header class="article-header">
+              <!-- 分类 -->
+              <div v-if="article.category" class="article-category">
+                <router-link
+                  :to="{ path: '/category', query: { categoryId: article.category.id } }"
+                  class="category-link cursor-interactive"
+                  data-cursor-label="分类"
+                >
+                  {{ article.category.name }}
+                </router-link>
+              </div>
+
+              <!-- 标题 -->
               <h1 class="article-title">{{ article.title }}</h1>
 
+              <!-- 元信息 -->
               <div class="article-meta">
-                <span>{{ formatDate(article.createdAt) }}</span>
-                <span v-if="article.category">
-                  <router-link :to="`/category/${article.category.id}`" class="category-link">
-                    {{ article.category.name }}
-                  </router-link>
+                <span class="meta-item">
+                  <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/>
+                    <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/>
+                  </svg>
+                  {{ formatDate(article.createdAt) }}
                 </span>
-                <span>{{ article.viewCount }} 阅读</span>
+                <span class="meta-item">
+                  <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                  </svg>
+                  {{ article.viewCount }} 阅读
+                </span>
               </div>
+            </header>
 
-              <div class="markdown-body" v-html="renderedContent"></div>
+            <!-- 文章正文 -->
+            <div class="markdown-body" v-html="renderedContent"></div>
 
-              <div class="article-tags" v-if="article.tags && article.tags.length">
-                <el-tag
-                  v-for="tag in article.tags"
-                  :key="tag.id"
-                  class="clickable-tag"
-                  @click="handleTagClick(tag.name)"
-                >
-                  {{ tag.name }}
-                </el-tag>
-              </div>
-            </el-card>
+            <!-- 文章标签 -->
+            <div v-if="article.tags && article.tags.length" class="article-tags">
+              <span class="tags-label">标签：</span>
+              <router-link
+                v-for="tag in article.tags"
+                :key="tag.id"
+                :to="{ path: '/tag', query: { tag: tag.name } }"
+                class="tag-item cursor-interactive"
+                data-cursor-label="标签"
+              >
+                {{ tag.name }}
+              </router-link>
+            </div>
 
-            <!-- 评论区域 -->
-            <el-card class="comments-section">
-              <template #header>
-                <h3>评论 ({{ comments.length }})</h3>
+            <!-- 文章分割线 -->
+            <div class="article-divider"></div>
+          </article>
+
+          <!-- 评论区 -->
+          <section v-if="article" class="comments-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <span class="title-icon">💬</span>
+                评论 ({{ comments.length }})
+              </h2>
+            </div>
+
+            <!-- 评论表单 -->
+            <div class="comment-form-card">
+              <template v-if="!isLoggedIn">
+                <div class="form-group">
+                  <label class="form-label">昵称</label>
+                  <div class="input-with-action">
+                    <input
+                      v-model="commentForm.nickname"
+                      type="text"
+                      class="form-input"
+                      placeholder="点击按钮生成随机昵称或自定义"
+                    />
+                    <button @click="generateNickname" class="input-action-btn cursor-interactive" data-cursor-label="生成">
+                      🎲 随机
+                    </button>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="user-display">
+                  <div class="user-avatar-display">
+                    <img v-if="userInfo.avatar" :src="userInfo.avatar" :alt="userInfo.nickname" />
+                    <span v-else class="avatar-placeholder">{{ (userInfo.nickname || '管理员')[0] }}</span>
+                  </div>
+                  <span class="user-name">{{ userInfo.nickname || userInfo.username || '管理员' }}</span>
+                </div>
               </template>
 
-              <!-- 未登录用户：显示昵称输入框 -->
-              <el-form v-if="!isLoggedIn" :model="commentForm" label-width="80px">
-                <el-form-item label="昵称">
-                  <el-input v-model="commentForm.nickname" placeholder="点击按钮生成随机昵称或自定义">
-                    <template #append>
-                      <el-button @click="generateNickname" type="primary">🎲 随机生成</el-button>
-                    </template>
-                  </el-input>
-                </el-form-item>
-                <el-form-item label="评论内容">
-                  <el-input
-                    v-model="commentForm.content"
-                    type="textarea"
-                    :rows="4"
-                    placeholder="说点什么吧..."
-                  />
-                </el-form-item>
-                <el-form-item>
-                  <el-button type="primary" @click="submitComment">提交评论</el-button>
-                </el-form-item>
-              </el-form>
+              <div class="form-group">
+                <label class="form-label">评论内容</label>
+                <textarea
+                  v-model="commentForm.content"
+                  class="form-textarea"
+                  rows="4"
+                  placeholder="说点什么吧..."
+                ></textarea>
+              </div>
 
-              <!-- 登录用户：直接显示用户信息 -->
-              <el-form v-else :model="commentForm" label-width="80px">
-                <el-form-item label="当前用户">
-                  <div class="user-info-display">
-                    <el-avatar :size="32" :src="userInfo.avatar || defaultAvatar" />
-                    <span>{{ userInfo.nickname || userInfo.username || '管理员' }}</span>
-                  </div>
-                </el-form-item>
-                <el-form-item label="评论内容">
-                  <el-input
-                    v-model="commentForm.content"
-                    type="textarea"
-                    :rows="4"
-                    placeholder="说点什么吧..."
-                  />
-                </el-form-item>
-                <el-form-item>
-                  <el-button type="primary" @click="submitComment">提交评论</el-button>
-                </el-form-item>
-              </el-form>
+              <button @click="submitComment" class="submit-btn cursor-interactive" data-cursor-label="提交">
+                提交评论
+              </button>
+            </div>
 
-              <div class="comment-list">
-                <div v-for="comment in comments" :key="comment.id" class="comment-item">
+            <!-- 评论列表 -->
+            <div class="comment-list">
+              <div v-for="comment in comments" :key="comment.id" class="comment-item">
+                <div class="comment-avatar">
+                  <img v-if="comment.userAvatar" :src="comment.userAvatar" :alt="comment.nickname" />
+                  <span v-else class="avatar-placeholder">{{ (comment.displayName || comment.nickname || '匿')[0] }}</span>
+                </div>
+                <div class="comment-body">
                   <div class="comment-header">
-                    <div class="comment-user">
-                      <el-avatar
-                        v-if="comment.userAvatar"
-                        :size="32"
-                        :src="comment.userAvatar"
-                        class="comment-avatar"
-                      />
-                      <strong>{{ comment.displayName || comment.nickname || '匿名用户' }}</strong>
-                    </div>
+                    <span class="comment-author">{{ comment.displayName || comment.nickname || '匿名用户' }}</span>
                     <span class="comment-time">{{ formatDate(comment.createdAt) }}</span>
                   </div>
                   <div class="comment-content">{{ comment.content }}</div>
                 </div>
-                <el-empty v-if="comments.length === 0" description="暂无评论，快来抢沙发吧！" />
               </div>
-            </el-card>
-          </div>
+              <div v-if="comments.length === 0" class="empty-comments">
+                <div class="empty-icon">💭</div>
+                <p>暂无评论，快来抢沙发吧！</p>
+              </div>
+            </div>
+          </section>
+        </div>
 
-          <!-- 右侧边栏 -->
-          <div class="sidebar" v-if="article">
-            <!-- 热门文章 -->
-            <el-card class="sidebar-card">
-              <template #header>
-                <h3 class="sidebar-title">🔥 热门文章</h3>
-              </template>
-              <div class="sidebar-article-list">
+        <!-- 右侧边栏 -->
+        <aside v-if="article" class="sidebar">
+          <!-- 热门文章 -->
+          <div class="sidebar-card">
+            <div class="sidebar-card-header">
+              <h3 class="sidebar-card-title">
+                <span class="title-icon">🔥</span>
+                热门文章
+              </h3>
+            </div>
+            <div class="sidebar-card-body">
+              <div v-if="hotArticles.length > 0" class="article-list">
                 <div
                   v-for="item in hotArticles"
                   :key="item.id"
-                  class="article-item"
+                  class="sidebar-article-item cursor-interactive"
+                  data-cursor-label="阅读"
                   @click="goToArticle(item.id)"
                 >
-                  <div class="article-item-title">{{ item.title }}</div>
-                  <div class="article-item-meta">
+                  <h4 class="sidebar-article-title">{{ item.title }}</h4>
+                  <div class="sidebar-article-meta">
                     <span>{{ item.viewCount }} 阅读</span>
                   </div>
                 </div>
-                <el-empty v-if="hotArticles.length === 0" description="暂无数据" :image-size="80" />
               </div>
-            </el-card>
+              <div v-else class="empty-mini">
+                <span>暂无数据</span>
+              </div>
+            </div>
+          </div>
 
-            <!-- 相关文章 -->
-            <el-card class="sidebar-card">
-              <template #header>
-                <h3 class="sidebar-title">📚 相关文章</h3>
-              </template>
-              <div class="sidebar-article-list">
+          <!-- 相关文章 -->
+          <div class="sidebar-card">
+            <div class="sidebar-card-header">
+              <h3 class="sidebar-card-title">
+                <span class="title-icon">📚</span>
+                相关文章
+              </h3>
+            </div>
+            <div class="sidebar-card-body">
+              <div v-if="relatedArticles.length > 0" class="article-list">
                 <div
                   v-for="item in relatedArticles"
                   :key="item.id"
-                  class="article-item"
+                  class="sidebar-article-item cursor-interactive"
+                  data-cursor-label="阅读"
                   @click="goToArticle(item.id)"
                 >
-                  <div class="article-item-title">{{ item.title }}</div>
-                  <div class="article-item-meta">
-                    <span v-if="item.category">
-                      <router-link :to="`/category/${item.category.id}`" class="category-link">
-                        {{ item.category.name }}
-                      </router-link>
-                    </span>
+                  <h4 class="sidebar-article-title">{{ item.title }}</h4>
+                  <div class="sidebar-article-meta">
+                    <span v-if="item.category">{{ item.category.name }}</span>
                     <span>{{ item.viewCount }} 阅读</span>
                   </div>
                 </div>
-                <el-empty v-if="relatedArticles.length === 0" description="暂无相关文章" :image-size="80" />
               </div>
-            </el-card>
+              <div v-else class="empty-mini">
+                <span>暂无相关文章</span>
+              </div>
+            </div>
           </div>
-        </div>
-      </el-main>
-
-      <el-footer>
-        <p>&copy; 2025 Syh Blog. 用心记录，用爱分享 ✨</p>
-      </el-footer>
-    </el-container>
+        </aside>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import MarkdownIt from 'markdown-it'
+import AppHeader from '@/components/AppHeader.vue'
 import { getArticleDetail, addViewCount, getHotArticles, getRelatedArticles } from '@/api/article'
 import { getCommentList, submitComment as postComment } from '@/api/comment'
-import { logout } from '@/api/auth'
 import { generateRandomNickname } from '@/utils/nicknameGenerator'
 
 const route = useRoute()
 const router = useRouter()
+
 const article = ref<any>(null)
-const comments = ref([])
+const comments = ref<any[]>([])
 const loading = ref(false)
 const error = ref('')
 const commentForm = ref({
@@ -245,12 +243,7 @@ const userInfo = ref<any>({})
 const hotArticles = ref<any[]>([])
 const relatedArticles = ref<any[]>([])
 
-const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-
-// 检查登录状态
-const isLoggedIn = computed(() => {
-  return !!localStorage.getItem('token')
-})
+const isLoggedIn = computed(() => !!localStorage.getItem('token'))
 
 const md = new MarkdownIt({
   html: true,
@@ -269,14 +262,10 @@ const loadArticle = async () => {
     error.value = ''
 
     const id = Number(route.params.id)
-    console.log('加载文章，ID:', id)
-
     const res = await getArticleDetail(id)
-    console.log('文章数据:', res)
 
     if (res.code === 200 && res.data) {
       article.value = res.data
-      // 增加浏览量
       await addViewCount(id)
 
       // 加载评论
@@ -290,7 +279,6 @@ const loadArticle = async () => {
         comments.value = []
       }
 
-      // 加载热门文章和相关文章
       loadSidebarArticles(id)
     } else {
       error.value = res.message || '文章不存在'
@@ -307,13 +295,11 @@ const loadArticle = async () => {
 
 const loadSidebarArticles = async (articleId: number) => {
   try {
-    // 加载热门文章
     const hotRes = await getHotArticles(5)
     if (hotRes.code === 200) {
       hotArticles.value = (hotRes.data || []).filter((item: any) => item.id !== articleId)
     }
 
-    // 加载相关文章
     const relatedRes = await getRelatedArticles(articleId, 5)
     if (relatedRes.code === 200) {
       relatedArticles.value = relatedRes.data || []
@@ -325,16 +311,11 @@ const loadSidebarArticles = async (articleId: number) => {
 
 const goToArticle = (id: number) => {
   router.push(`/article/${id}`)
-  // 滚动到顶部
   window.scrollTo({ top: 0, behavior: 'smooth' })
-  // 重新加载数据
-  setTimeout(() => {
-    loadArticle()
-  }, 100)
+  setTimeout(() => loadArticle(), 100)
 }
 
 const submitComment = async () => {
-  // 未登录用户必须填写昵称
   if (!isLoggedIn.value && !commentForm.value.nickname) {
     ElMessage.warning('请填写昵称')
     return
@@ -351,7 +332,6 @@ const submitComment = async () => {
       content: commentForm.value.content
     }
 
-    // 只有未登录用户才传 nickname
     if (!isLoggedIn.value) {
       data.nickname = commentForm.value.nickname
     }
@@ -360,11 +340,7 @@ const submitComment = async () => {
 
     if (res.code === 200) {
       ElMessage.success('评论提交成功')
-      commentForm.value = {
-        nickname: '',
-        content: ''
-      }
-      // 重新加载评论
+      commentForm.value = { nickname: '', content: '' }
       await loadArticle()
     } else {
       ElMessage.error(res.message || '评论提交失败')
@@ -375,53 +351,19 @@ const submitComment = async () => {
   }
 }
 
-// 生成随机昵称
 const generateNickname = () => {
   commentForm.value.nickname = generateRandomNickname()
 }
 
 const formatDate = (date: string) => {
   if (!date) return ''
-  return new Date(date).toLocaleString('zh-CN')
+  return new Date(date).toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
-// 标签点击处理
-const handleTagClick = (tagName: string) => {
-  router.push({ path: '/tag', query: { tag: tagName } })
-}
-
-// 跳转到登录页面
-const goToLogin = () => {
-  router.push('/admin/login')
-}
-
-// 跳转到管理后台
-const goToAdmin = () => {
-  router.push('/admin/dashboard')
-}
-
-// 退出登录
-const handleLogout = async () => {
-  try {
-    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-
-    await logout()
-    localStorage.removeItem('token')
-    localStorage.removeItem('userInfo')
-    userInfo.value = {}
-    ElMessage.success('退出成功')
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('退出失败', error)
-    }
-  }
-}
-
-// 加载用户信息
 const loadUserInfo = () => {
   const savedUserInfo = localStorage.getItem('userInfo')
   if (savedUserInfo) {
@@ -440,571 +382,707 @@ onMounted(() => {
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
-}
-
-.article-detail-container {
+.article-detail-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.article-detail-container::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.el-container {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.el-main {
-  padding: 67px 40px 20px 40px;
-  flex: 1;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.el-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 0;
-  width: 100%;
-  flex-shrink: 0;
-  height: 47px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 47px;
-  padding: 0 40px;
-  gap: 60px;
-  width: 100%;
-}
-
-.site-title {
-  font-size: 22px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 1px;
-  flex-shrink: 0;
-  margin: 0;
-}
-
-.nav-menu {
-  display: flex;
-  gap: 30px;
-  flex: 1;
-  justify-content: center;
-  margin: 0;
-}
-
-.right-section {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.nav-menu a {
-  text-decoration: none;
-  color: #333;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  position: relative;
-  padding: 5px 0;
-}
-
-.nav-menu a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  transition: width 0.3s ease;
-}
-
-.nav-menu a:hover {
-  color: #4a5568;
-}
-
-.nav-menu a:hover::after {
-  width: 100%;
-}
-
-.user-section {
-  display: flex;
-  align-items: center;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 5px 15px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.user-info:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(52, 73, 94, 0.1) 100%);
-}
-
-.username {
-  font-weight: 500;
-  color: #333;
-  font-size: 14px;
-}
-
-.login-btn {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  border: none;
-  padding: 8px 24px;
-  font-weight: 500;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
+  background: var(--bg-primary);
+  padding-top: 72px;
 }
 
 .main-content {
-  display: grid;
-  grid-template-columns: 1fr 28%;
-  gap: 3%;
-  align-items: start;
-  width: 90%;
-  max-width: none;
-  margin: 0 auto;
-}
-
-.article-list {
-  min-height: 0;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.article-list .el-card {
-  margin-bottom: 20px;
-  border-radius: 16px;
-  border: none;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-}
-
-.article-list .el-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(74, 85, 104, 0.2);
-}
-
-.article-list :deep(.el-card__body) {
-  padding: 24px;
-}
-
-.error-alert {
-  margin-bottom: 20px;
-}
-
-.loading-container {
   width: 100%;
+  padding: var(--space-8) 0;
+}
+
+.content-container {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-8);
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.content-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ----- 加载状态 ----- */
+.loading-container {
+  padding: var(--space-16);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+
+.skeleton-title {
+  height: 48px;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-6);
+}
+
+.skeleton-meta {
+  height: 24px;
+  width: 300px;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-8);
+}
+
+.skeleton-content {
+  height: 400px;
+  border-radius: var(--radius-lg);
+}
+
+/* ----- 错误状态 ----- */
+.error-state {
+  text-align: center;
+  padding: var(--space-20) var(--space-8);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+
+.error-icon {
+  font-size: 64px;
+  margin-bottom: var(--space-6);
+  opacity: 0.5;
+}
+
+.error-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ----- 文章内容 ----- */
+.article-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.article-header {
+  padding: var(--space-6) var(--space-8) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.article-category {
+  margin-bottom: var(--space-4);
+}
+
+.category-link {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(212, 163, 115, 0.1);
+  color: var(--accent-gold);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  text-decoration: none;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s var(--ease-out);
+}
+
+.category-link:hover {
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  transform: translateY(-2px);
 }
 
 .article-title {
-  font-size: 32px;
-  margin-bottom: 20px;
-  line-height: 1.4;
-  color: #303133;
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-4);
 }
 
 .article-meta {
-  color: #909399;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-6);
+  flex-wrap: wrap;
 }
 
-.article-meta span {
-  margin-right: 20px;
-  display: flex;
+.meta-item {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-2);
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
 }
 
-.article-meta span::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  border-radius: 50%;
+.meta-icon {
+  width: 16px;
+  height: 16px;
 }
 
-.article-meta .category-link {
-  text-decoration: none;
-  color: #4a5568;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.article-meta .category-link:hover {
-  color: #409eff;
-  text-decoration: underline;
-}
-
+/* ----- Markdown 正文 ----- */
 .markdown-body {
-  line-height: 1.8;
-  font-size: 16px;
-  color: #606266;
-  min-height: 300px;
+  padding: var(--space-6) var(--space-8);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* 确保 Markdown 内所有元素不溢出 */
+.markdown-body :deep(*) {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .markdown-body :deep(h1),
 .markdown-body :deep(h2),
-.markdown-body :deep(h3) {
-  margin-top: 24px;
-  margin-bottom: 16px;
-  font-weight: 600;
-  line-height: 1.25;
+.markdown-body :deep(h3),
+.markdown-body :deep(h4),
+.markdown-body :deep(h5),
+.markdown-body :deep(h6) {
+  font-family: var(--font-display);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+  line-height: 1.3;
 }
 
+.markdown-body :deep(h1) { font-size: var(--text-3xl); }
+.markdown-body :deep(h2) { font-size: var(--text-2xl); }
+.markdown-body :deep(h3) { font-size: var(--text-xl); }
+.markdown-body :deep(h4) { font-size: var(--text-lg); }
+
 .markdown-body :deep(p) {
-  margin-bottom: 16px;
+  margin-bottom: var(--space-3);
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.markdown-body :deep(a) {
+  color: var(--accent-gold);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s var(--ease-out);
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.markdown-body :deep(a:hover) {
+  border-color: var(--accent-gold);
 }
 
 .markdown-body :deep(code) {
-  background: #f6f8fa;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+  color: var(--accent-gold);
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 
 .markdown-body :deep(pre) {
-  background: #f6f8fa;
-  padding: 16px;
-  border-radius: 6px;
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   overflow-x: auto;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
+  max-width: 100%;
 }
 
-.article-tags {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.article-tags .el-tag {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
-  border-color: transparent;
-  color: #4a5568;
-  font-weight: 500;
-}
-
-.article-tags .clickable-tag {
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.article-tags .clickable-tag:hover {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(74, 85, 104, 0.3);
-}
-
-.comments-section {
-  margin-top: 0;
-  border-radius: 16px;
+.markdown-body :deep(pre code) {
+  background: transparent;
   border: none;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  padding: 0;
+  max-width: 100%;
+  white-space: pre;
+  word-wrap: normal;
 }
 
-.comments-section :deep(.el-card__header) {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-bottom: 1px solid rgba(74, 85, 104, 0.1);
-  padding: 18px 20px;
+.markdown-body :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  margin: var(--space-4) 0;
 }
 
-.comments-section h3 {
+.markdown-body :deep(blockquote) {
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--accent-gold);
+  color: var(--text-tertiary);
+  font-style: italic;
+  margin: var(--space-4) 0;
+}
+
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.markdown-body :deep(li) {
+  margin-bottom: var(--space-2);
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.markdown-body :deep(table) {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-4) 0;
+  overflow-x: auto;
+  display: block;
+}
+
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  text-align: left;
+  min-width: 80px;
+}
+
+.markdown-body :deep(th) {
+  background: var(--bg-secondary);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+/* ----- 文章标签 ----- */
+.article-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-8);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.tags-label {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.tag-item {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  background: rgba(212, 163, 115, 0.06);
+  border: 1px solid var(--border-accent);
+  color: var(--accent-gold);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  text-decoration: none;
+  border-radius: var(--radius-full);
+  transition: all 0.3s var(--ease-out);
+}
+
+.tag-item:hover {
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+  transform: translateY(-2px);
+}
+
+.article-divider {
+  height: 1px;
+  background: var(--border-subtle);
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
+/* ----- 评论区 ----- */
+.comments-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.section-header {
+  padding: var(--space-6) var(--space-8);
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(212, 163, 115, 0.03);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.title-icon {
+  font-size: var(--text-xl);
+}
+
+.comment-form-card {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.user-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-6);
+}
+
+.user-avatar-display {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-avatar-display img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-name {
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.form-group {
+  margin-bottom: var(--space-5);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  transition: all 0.3s var(--ease-out);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  background: var(--bg-elevated);
+}
+
+.input-with-action {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.form-input {
+  flex: 1;
+}
+
+.input-action-btn {
+  padding: var(--space-3) var(--space-5);
+  background: var(--accent-gold);
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius-lg);
+  color: var(--bg-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  cursor: none;
+  transition: all 0.3s var(--ease-out);
+  white-space: nowrap;
+}
+
+.input-action-btn:hover {
+  background: transparent;
+  color: var(--accent-gold);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--accent-gold);
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius-lg);
+  color: var(--bg-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  cursor: none;
+  transition: all 0.3s var(--ease-out);
+}
+
+.submit-btn:hover {
+  background: transparent;
+  color: var(--accent-gold);
+}
+
+/* ----- 评论列表 ----- */
 .comment-list {
-  margin-top: 20px;
+  padding: var(--space-6);
 }
 
 .comment-item {
-  padding: 15px 0;
-  border-bottom: 1px solid #eee;
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .comment-item:last-child {
   border-bottom: none;
 }
 
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-secondary);
+}
+
+.comment-body {
+  flex: 1;
+  min-width: 0;
+}
+
 .comment-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
-.comment-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.comment-avatar {
-  flex-shrink: 0;
+.comment-author {
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
 }
 
 .comment-time {
-  color: #909399;
-  font-size: 14px;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
 }
 
 .comment-content {
+  color: var(--text-secondary);
   line-height: 1.6;
-  color: #606266;
+  word-break: break-word;
 }
 
-.user-info-display {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-radius: 8px;
+.empty-comments {
+  text-align: center;
+  padding: var(--space-12) var(--space-8);
 }
 
-.user-info-display span {
-  font-weight: 500;
-  color: #303133;
+.empty-comments .empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+  opacity: 0.5;
 }
 
-/* 侧边栏样式 */
+.empty-comments p {
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+/* ----- 侧边栏 ----- */
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-6);
 }
 
 .sidebar-card {
-  margin-bottom: 0;
-  border-radius: 16px;
-  border: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition: all 0.3s var(--ease-out);
 }
 
 .sidebar-card:hover {
-  box-shadow: 0 8px 30px rgba(74, 85, 104, 0.15);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-lg);
 }
 
-.sidebar-card :deep(.el-card__header) {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-bottom: 1px solid rgba(74, 85, 104, 0.1);
-  padding: 18px 20px;
+.sidebar-card-header {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(212, 163, 115, 0.03);
 }
 
-.sidebar-title {
-  font-size: 18px;
+.sidebar-card-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
   margin: 0;
-  font-weight: 600;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.sidebar-card :deep(.el-card__body) {
-  padding: 20px;
+.sidebar-card-body {
+  padding: var(--space-5);
 }
 
-.sidebar-article-list {
+.article-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
-.article-item {
-  padding: 14px;
-  border-radius: 8px;
+.sidebar-article-item {
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid #e4e7ed;
-  background: #fff;
+  cursor: none;
+  transition: all 0.3s var(--ease-out);
 }
 
-.article-item:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
-  border-color: #4a5568;
+.sidebar-article-item:hover {
+  border-color: var(--border-accent);
   transform: translateX(4px);
-  box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
-.article-item-title {
-  font-size: 15px;
-  color: #303133;
-  line-height: 1.6;
-  margin-bottom: 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.sidebar-article-title {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2);
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  font-weight: 500;
+  overflow: hidden;
 }
 
-.article-item-meta {
-  font-size: 13px;
-  color: #909399;
+.sidebar-article-meta {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
 }
 
-.article-item-meta span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.article-item-meta .category-link {
-  text-decoration: none;
-  color: #4a5568;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.article-item-meta .category-link:hover {
-  color: #409eff;
-  text-decoration: underline;
-}
-
-.el-footer {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+.empty-mini {
   text-align: center;
-  color: #909399;
-  padding: 20px 40px;
-  border-top: 1px solid rgba(74, 85, 104, 0.1);
-  flex-shrink: 0;
+  padding: var(--space-6);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
 }
 
-/* 响应式设计 */
-@media (max-width: 1200px) {
-  .main-content {
-    grid-template-columns: 1fr 30%;
-    gap: 4%;
-    width: 92%;
+/* ----- 响应式 ----- */
+@media (max-width: 1280px) {
+  .content-container {
+    grid-template-columns: 1fr 320px;
   }
 
-  .el-main {
-    padding: 62px 20px 20px 20px;
+  .article-title {
+    font-size: var(--text-2xl);
+  }
+}
+
+@media (max-width: 1024px) {
+  .content-container {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
+  .article-detail-page {
+    padding-top: 60px;
+  }
+
+  .content-container {
+    padding: 0 var(--space-4);
+  }
+
   .main-content {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    width: 94%;
+    padding: var(--space-6) 0;
   }
 
-  .header-content {
-    flex-wrap: wrap;
-    height: auto;
-    padding: 15px 20px;
-    gap: 15px;
-  }
-
-  .site-title {
-    font-size: 18px;
-  }
-
-  .nav-menu {
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    order: 3;
-    width: 100%;
-  }
-
-  .right-section {
-    order: 2;
-  }
-
-  .user-info .username {
-    display: none;
-  }
-
-  .el-header {
-    height: auto;
-    min-height: 47px;
+  .article-header {
+    padding: var(--space-5) var(--space-6) var(--space-3);
   }
 
   .article-title {
-    font-size: 24px;
-  }
-
-  .article-meta {
-    font-size: 13px;
+    font-size: var(--text-2xl);
   }
 
   .markdown-body {
-    font-size: 15px;
+    padding: var(--space-5) var(--space-6);
+    font-size: var(--text-sm);
+  }
+
+  .comment-form-card {
+    padding: var(--space-5);
+  }
+
+  .comment-list {
+    padding: var(--space-5);
   }
 }
 </style>

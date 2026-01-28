@@ -1,0 +1,392 @@
+/* ============================================
+   编辑杂志 × 暗色奢华风格 设计系统
+   Editorial Magazine × Dark Luxury Design System
+   ============================================ */
+
+/* ==================== 字体导入 ==================== */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ==================== CSS 变量定义 ==================== */
+:root {
+  /* ----- 主色调 - 暗色奢华 ----- */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-elevated: #1a1a1a;
+  --bg-card: #111111;
+
+  /* ----- 强调色 ----- */
+  --accent-gold: #d4a373;
+  --accent-gold-light: #e8c9a0;
+  --accent-gold-dark: #b8956a;
+  --accent-red: #c1121f;
+  --accent-red-dark: #9f0a1a;
+  --accent-glow: rgba(212, 163, 115, 0.15);
+  --accent-glow-strong: rgba(212, 163, 115, 0.25);
+
+  /* ----- 文字色 ----- */
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --text-muted: #52525b;
+  --text-gold: #d4a373;
+
+  /* ----- 边框与线条 ----- */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.1);
+  --border-accent: rgba(212, 163, 115, 0.3);
+  --border-accent-strong: rgba(212, 163, 115, 0.5);
+
+  /* ----- 阴影 ----- */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 40px var(--accent-glow);
+  --shadow-glow-strong: 0 0 60px var(--accent-glow-strong);
+
+  /* ----- 字体家族 ----- */
+  --font-display: 'Playfair Display', 'Times New Roman', serif;
+  --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+  --font-code: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* ----- 字体大小 ----- */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+  --text-5xl: 3rem;        /* 48px */
+  --text-6xl: 3.75rem;     /* 60px */
+  --text-7xl: 4.5rem;      /* 72px */
+  --text-8xl: 6rem;        /* 96px */
+
+  /* ----- 字重 ----- */
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+
+  /* ----- 间距系统 ----- */
+  --space-1: 0.25rem;      /* 4px */
+  --space-2: 0.5rem;       /* 8px */
+  --space-3: 0.75rem;      /* 12px */
+  --space-4: 1rem;         /* 16px */
+  --space-5: 1.25rem;      /* 20px */
+  --space-6: 1.5rem;       /* 24px */
+  --space-8: 2rem;         /* 32px */
+  --space-10: 2.5rem;      /* 40px */
+  --space-12: 3rem;        /* 48px */
+  --space-16: 4rem;        /* 64px */
+  --space-20: 5rem;        /* 80px */
+  --space-24: 6rem;        /* 96px */
+
+  /* ----- 圆角 ----- */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* ----- 过渡 ----- */
+  --transition-fast: 150ms;
+  --transition-base: 250ms;
+  --transition-slow: 350ms;
+  --transition-slower: 500ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ----- 层级 ----- */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+
+  /* ----- 容器宽度 ----- */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1440px;
+
+  /* ----- 内容宽度 ----- */
+  --content-narrow: 680px;
+  --content-wide: 920px;
+}
+
+/* ==================== 全局重置 ==================== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-normal);
+  line-height: 1.7;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* 隐藏默认光标，使用自定义光标 */
+  cursor: none;
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ==================== 滚动条样式 ==================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-gold-dark);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold);
+}
+
+/* Firefox 滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-gold-dark) var(--bg-secondary);
+}
+
+/* ==================== 选择样式 ==================== */
+::selection {
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+}
+
+::-moz-selection {
+  background: var(--accent-gold);
+  color: var(--bg-primary);
+}
+
+/* ==================== 链接样式 ==================== */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-base) var(--ease-out);
+}
+
+/* ==================== 图片样式 ==================== */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ==================== 按钮重置 ==================== */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  cursor: none; /* 使用自定义光标 */
+}
+
+/* ==================== 输入框重置 ==================== */
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+/* ==================== 列表重置 ==================== */
+ul,
+ol {
+  list-style: none;
+}
+
+/* ==================== 背景纹理效果 ==================== */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  /* 噪点纹理 */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+}
+
+/* 径向渐变光晕 */
+body::after {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse 80% 80% at 50% 50%,
+    rgba(212, 163, 115, 0.04) 0%,
+    transparent 50%
+  );
+}
+
+/* ==================== 工具类 ==================== */
+
+/* ----- 文字 ----- */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-code {
+  font-family: var(--font-code);
+}
+
+.text-gold {
+  color: var(--accent-gold);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ----- 容器 ----- */
+.container {
+  width: 100%;
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: var(--content-narrow);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+/* ----- 边框 ----- */
+.border-accent {
+  border: 1px solid var(--border-accent);
+}
+
+.border-subtle {
+  border: 1px solid var(--border-subtle);
+}
+
+/* ----- 阴影 ----- */
+.shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.shadow-glow-strong {
+  box-shadow: var(--shadow-glow-strong);
+}
+
+/* ----- 过渡 ----- */
+.transition-all {
+  transition: all var(--transition-base) var(--ease-out);
+}
+
+/* ----- 装饰性边框 ----- */
+.decorative-border {
+  position: relative;
+}
+
+.decorative-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--border-accent);
+  opacity: 0;
+  transition: opacity var(--transition-base) var(--ease-out);
+  pointer-events: none;
+}
+
+.decorative-border:hover::before {
+  opacity: 1;
+}
+
+/* ==================== Element Plus 样式覆盖 ==================== */
+.el-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+
+.el-button--primary {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  color: var(--bg-primary);
+  font-weight: var(--font-medium);
+}
+
+.el-button--primary:hover {
+  background: var(--accent-gold-light);
+  border-color: var(--accent-gold-light);
+}
+
+.el-input__wrapper {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+
+.el-input__wrapper:hover,
+.el-input__wrapper.is-focus {
+  border-color: var(--accent-gold);
+}
+
+.el-tag {
+  background: rgba(212, 163, 115, 0.1);
+  border-color: var(--border-accent);
+  color: var(--accent-gold);
+}

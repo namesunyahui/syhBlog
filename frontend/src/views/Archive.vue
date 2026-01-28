@@ -1,218 +1,133 @@
 <template>
-  <div class="archive-container">
-    <el-container>
-      <!-- 导航栏 -->
-      <el-header>
-        <div class="header-content">
-          <h1 class="site-title">Syh Blog</h1>
-          <nav class="nav-menu">
-            <router-link to="/">🏠 首页</router-link>
-            <router-link to="/category">📂 分类</router-link>
-            <router-link to="/tag">🏷️ 标签</router-link>
-            <router-link to="/archive">📦 归档</router-link>
-            <router-link to="/about">👤 关于</router-link>
-          </nav>
-          <div class="right-section">
-            <div class="user-section">
-              <template v-if="isLoggedIn">
-                <el-dropdown>
-                  <span class="user-info">
-                    <el-avatar :size="32" :src="userInfo.avatar || defaultAvatar" />
-                    <span class="username">{{ userInfo.nickname || '管理员' }}</span>
-                  </span>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item @click="goToAdmin">
-                        🎯 管理后台
-                      </el-dropdown-item>
-                      <el-dropdown-item divided @click="handleLogout">
-                        🚪 退出登录
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </template>
-              <template v-else>
-                <el-button type="primary" @click="goToLogin" class="login-btn">
-                  🔐 登录
-                </el-button>
-              </template>
+  <div class="archive-page">
+    <AppHeader />
+
+    <main class="main-content">
+      <div class="content-container">
+        <!-- 左侧归档内容 -->
+        <div class="content-left">
+          <!-- 英雄区 -->
+          <section class="hero-section scroll-reveal">
+            <h1 class="hero-title">
+              <span class="title-line">文章</span>
+              <span class="title-line title-accent">归档</span>
+            </h1>
+            <p class="hero-subtitle">
+              共 {{ totalCount }} 篇文章，分布在 {{ statistics.totalYears }} 个年份的 {{ statistics.totalMonths }} 个月份中
+            </p>
+          </section>
+
+          <!-- 加载状态 -->
+          <div v-if="loading" class="loading-container scroll-reveal">
+            <div class="skeleton-year skeleton"></div>
+            <div class="skeleton-months">
+              <div v-for="i in 3" :key="i" class="skeleton-month skeleton"></div>
             </div>
           </div>
-        </div>
-      </el-header>
 
-      <!-- 主体内容 -->
-      <el-main>
-        <div class="main-content">
-          <!-- 左侧归档内容 -->
-          <div class="archive-content">
-            <!-- 加载状态 -->
-            <div v-if="loading" class="loading-container">
-              <el-skeleton :rows="5" animated />
-            </div>
-
-            <!-- 空状态 -->
-            <div v-else-if="archives.length === 0" class="empty-state">
-              <div class="empty-icon">📭</div>
-              <div class="empty-text">暂无归档文章</div>
-            </div>
-
-            <!-- 归档时间线 -->
-            <template v-else>
-              <div class="archive-header">
-                <h2>📦 文章归档</h2>
-                <p class="archive-stats">
-                  共 {{ totalCount }} 篇文章，
-                  分布在 {{ statistics.totalYears }} 个年份的
-                  {{ statistics.totalMonths }} 个月份中
-                </p>
-              </div>
-
-              <!-- 年份分组 -->
-              <div v-for="yearArchive in archives" :key="yearArchive.year" class="year-group">
-                <!-- 年份头部 -->
-                <div class="year-header" @click="toggleYear(yearArchive.year)">
-                  <div class="year-title">
-                    <span class="year-icon">{{ isYearExpanded(yearArchive.year) ? '📂' : '📁' }}</span>
-                    <span class="year-text">{{ yearArchive.year }}年</span>
-                    <span class="year-count">{{ getYearTotalCount(yearArchive) }} 篇</span>
-                  </div>
-                  <el-icon class="toggle-icon" :class="{ 'is-expanded': isYearExpanded(yearArchive.year) }">
-                    <ArrowDown />
-                  </el-icon>
-                </div>
-
-                <!-- 月份列表 -->
-                <el-collapse-transition>
-                  <div v-show="isYearExpanded(yearArchive.year)" class="months-container">
-                    <!-- 月份分组 -->
-                    <div v-for="monthArchive in yearArchive.months" :key="monthArchive.month" class="month-group">
-                      <!-- 月份头部 -->
-                      <div class="month-header" @click="toggleMonth(yearArchive.year, monthArchive.month)">
-                        <span class="month-icon">{{ isMonthExpanded(yearArchive.year, monthArchive.month) ? '📖' : '📕' }}</span>
-                        <span class="month-text">{{ monthArchive.month }}月</span>
-                        <span class="month-count">{{ monthArchive.count }} 篇</span>
-                        <el-icon class="toggle-icon" :class="{ 'is-expanded': isMonthExpanded(yearArchive.year, monthArchive.month) }">
-                          <ArrowDown />
-                        </el-icon>
-                      </div>
-
-                      <!-- 文章列表 -->
-                      <el-collapse-transition>
-                        <div v-show="isMonthExpanded(yearArchive.year, monthArchive.month)" class="articles-list">
-                          <div v-for="article in monthArchive.articles" :key="article.id" class="archive-article">
-                            <router-link :to="`/article/${article.id}`" class="article-link">
-                              <div class="article-title">{{ article.title }}</div>
-                              <div class="article-meta">
-                                <span class="meta-date">📅 {{ formatFullDate(article.createdAt) }}</span>
-                                <span v-if="article.category" class="meta-category">
-                                  📁 <router-link :to="`/category/${article.category.id}`" class="category-link" @click.stop>{{ article.category.name }}</router-link>
-                                </span>
-                                <span class="meta-views">👁️ {{ article.viewCount }}</span>
-                                <span v-if="article.tags && article.tags.length" class="meta-tags">
-                                  🏷️
-                                  <span v-for="(tag, index) in article.tags" :key="tag.id">
-                                    {{ tag.name }}{{ index < article.tags.length - 1 ? ', ' : '' }}
-                                  </span>
-                                </span>
-                              </div>
-                            </router-link>
-                          </div>
-                        </div>
-                      </el-collapse-transition>
-                    </div>
-                  </div>
-                </el-collapse-transition>
-              </div>
-            </template>
+          <!-- 空状态 -->
+          <div v-else-if="archives.length === 0" class="empty-state scroll-reveal">
+            <div class="empty-icon">📭</div>
+            <h3 class="empty-title">暂无归档文章</h3>
           </div>
 
-          <!-- 右侧边栏 -->
-          <div class="sidebar">
-            <el-card class="sidebar-card">
-              <template #header>
-                <h3>🔍 搜索</h3>
-              </template>
-              <el-input
-                v-model="searchKeyword"
-                placeholder="输入关键词搜索文章..."
-                @keyup.enter="handleSearch"
-                clearable
+          <!-- 归档时间线 -->
+          <div v-else class="archive-timeline scroll-reveal">
+            <div
+              v-for="yearArchive in archives"
+              :key="yearArchive.year"
+              class="year-group"
+            >
+              <!-- 年份头部 -->
+              <div
+                class="year-header cursor-interactive"
+                :class="{ 'is-expanded': isYearExpanded(yearArchive.year) }"
+                data-cursor-label="展开/收起"
+                @click="toggleYear(yearArchive.year)"
               >
-                <template #append>
-                  <el-button :icon="Search" @click="handleSearch">搜索</el-button>
-                </template>
-              </el-input>
-            </el-card>
-
-            <el-card class="sidebar-card">
-              <template #header>
-                <h3>📁 分类</h3>
-              </template>
-              <ul class="category-list" v-if="categories.length">
-                <li v-for="category in categories" :key="category.id">
-                  <router-link :to="{ path: '/category', query: { categoryId: category.id } }">
-                    <span>{{ category.name }}</span>
-                    <span class="count">{{ category.articleCount }}</span>
-                  </router-link>
-                </li>
-              </ul>
-              <div v-else class="empty-state" style="padding: 30px 10px;">
-                <div class="empty-text" style="font-size: 14px;">暂无分类</div>
+                <div class="year-title">
+                  <span class="year-text">{{ yearArchive.year }}年</span>
+                  <span class="year-count">{{ getYearTotalCount(yearArchive) }} 篇</span>
+                </div>
+                <svg class="toggle-icon" :class="{ 'is-rotated': isYearExpanded(yearArchive.year) }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </div>
-            </el-card>
 
-            <el-card class="sidebar-card">
-              <template #header>
-                <h3>🏷️ 标签</h3>
-              </template>
-              <div class="tag-cloud" v-if="tags.length">
-                <el-tag
-                  v-for="tag in tags"
-                  :key="tag.id"
-                  class="tag-item"
-                  @click="handleTagClick(tag.name)"
+              <!-- 月份列表 -->
+              <div v-show="isYearExpanded(yearArchive.year)" class="months-container">
+                <div
+                  v-for="monthArchive in yearArchive.months"
+                  :key="monthArchive.month"
+                  class="month-group"
                 >
-                  {{ tag.name }}
-                </el-tag>
+                  <!-- 月份头部 -->
+                  <div
+                    class="month-header cursor-interactive"
+                    :class="{ 'is-expanded': isMonthExpanded(yearArchive.year, monthArchive.month) }"
+                    data-cursor-label="展开/收起"
+                    @click="toggleMonth(yearArchive.year, monthArchive.month)"
+                  >
+                    <span class="month-text">{{ monthArchive.month }}月</span>
+                    <span class="month-count">{{ monthArchive.count }} 篇</span>
+                    <svg class="toggle-icon" :class="{ 'is-rotated': isMonthExpanded(yearArchive.year, monthArchive.month) }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+
+                  <!-- 文章列表 -->
+                  <div v-show="isMonthExpanded(yearArchive.year, monthArchive.month)" class="articles-list">
+                    <router-link
+                      v-for="article in monthArchive.articles"
+                      :key="article.id"
+                      :to="`/article/${article.id}`"
+                      class="article-item cursor-interactive"
+                      data-cursor-label="阅读"
+                    >
+                      <div class="article-title">{{ article.title }}</div>
+                      <div class="article-meta">
+                        <span class="meta-date">{{ formatFullDate(article.createdAt) }}</span>
+                        <span v-if="article.category" class="meta-category">
+                          {{ article.category.name }}
+                        </span>
+                        <span class="meta-views">{{ article.viewCount }} 阅读</span>
+                      </div>
+                    </router-link>
+                  </div>
+                </div>
               </div>
-              <div v-else class="empty-state" style="padding: 30px 10px;">
-                <div class="empty-text" style="font-size: 14px;">暂无标签</div>
-              </div>
-            </el-card>
+            </div>
           </div>
         </div>
-      </el-main>
 
-      <!-- 页脚 -->
-      <el-footer>
-        <p>&copy; 2025 Syh Blog. 用心记录，用爱分享 ✨</p>
-      </el-footer>
-    </el-container>
+        <!-- 右侧边栏 -->
+        <AppSidebar
+          :categories="categories"
+          :tags="tags"
+          :modelValue="{ searchKeyword }"
+          @update:searchKeyword="searchKeyword = $event"
+          @search="handleSearch"
+        />
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowDown, Search } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import { getGroupedArchive } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
-import { logout } from '@/api/auth'
 
-const router = useRouter()
-
-// 类型定义
 interface Article {
   id: number
   title: string
   createdAt: string
   viewCount: number
   category?: { id: number; name: string }
-  tags?: Array<{ id: number; name: string }>
 }
 
 interface MonthArchive {
@@ -237,40 +152,28 @@ interface ArchiveVO {
   statistics: Statistics
 }
 
-// 响应式数据
+const router = useRouter()
+
 const archives = ref<ArchiveDTO[]>([])
 const totalCount = ref(0)
 const statistics = ref<Statistics>({ totalYears: 0, totalMonths: 0 })
 const loading = ref(true)
-
-// 侧边栏数据
 const categories = ref([])
 const tags = ref([])
 const searchKeyword = ref('')
-const userInfo = ref<any>({})
-
-const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-
-// 检查登录状态
-const isLoggedIn = computed(() => {
-  return !!localStorage.getItem('token')
-})
 
 // 展开状态管理
 const expandedYears = ref<Set<number>>(new Set())
 const expandedMonths = ref<Map<string, Set<number>>>(new Map())
 
-// 计算某年文章总数
 const getYearTotalCount = (yearArchive: ArchiveDTO) => {
   return yearArchive.months.reduce((sum, month) => sum + month.count, 0)
 }
 
-// 判断年份是否展开
 const isYearExpanded = (year: number) => {
   return expandedYears.value.has(year)
 }
 
-// 切换年份展开状态
 const toggleYear = (year: number) => {
   if (expandedYears.value.has(year)) {
     expandedYears.value.delete(year)
@@ -279,14 +182,12 @@ const toggleYear = (year: number) => {
   }
 }
 
-// 判断月份是否展开
 const isMonthExpanded = (year: number, month: number) => {
   const yearKey = year.toString()
   const months = expandedMonths.value.get(yearKey)
   return months ? months.has(month) : false
 }
 
-// 切换月份展开状态
 const toggleMonth = (year: number, month: number) => {
   const yearKey = year.toString()
   if (!expandedMonths.value.has(yearKey)) {
@@ -300,7 +201,6 @@ const toggleMonth = (year: number, month: number) => {
   }
 }
 
-// 格式化完整日期
 const formatFullDate = (dateStr: string) => {
   const date = new Date(dateStr)
   return date.toLocaleDateString('zh-CN', {
@@ -310,7 +210,6 @@ const formatFullDate = (dateStr: string) => {
   })
 }
 
-// 加载归档数据
 const loadArchive = async () => {
   loading.value = true
   try {
@@ -320,7 +219,6 @@ const loadArchive = async () => {
     totalCount.value = data.totalCount || 0
     statistics.value = data.statistics || { totalYears: 0, totalMonths: 0 }
 
-    // 默认展开最近年份的第一个月
     if (archives.value.length > 0) {
       const latestYear = archives.value[0].year
       expandedYears.value.add(latestYear)
@@ -331,701 +229,396 @@ const loadArchive = async () => {
     }
   } catch (error) {
     console.error('加载归档失败', error)
-    ElMessage.error('加载归档失败，请稍后重试')
   } finally {
     loading.value = false
+    // 数据加载完成后触发滚动动画
+    setTimeout(handleScrollReveal, 50)
   }
 }
 
-// 加载分类
 const loadCategories = async () => {
   try {
     const res = await getCategoryList()
     categories.value = res.data || []
   } catch (error) {
     console.error('加载分类失败', error)
-    categories.value = []
   }
 }
 
-// 加载标签
 const loadTags = async () => {
   try {
     const res = await getTagList()
     tags.value = res.data || []
   } catch (error) {
     console.error('加载标签失败', error)
-    tags.value = []
   }
 }
 
-// 搜索处理
 const handleSearch = () => {
   if (searchKeyword.value) {
     router.push({ path: '/search', query: { keyword: searchKeyword.value } })
   }
 }
 
-// 标签点击处理
-const handleTagClick = (tagName: string) => {
-  router.push({ path: '/tag', query: { tag: tagName } })
-}
+// 滚动触发动画
+const handleScrollReveal = () => {
+  const elements = document.querySelectorAll('.scroll-reveal')
+  const windowHeight = window.innerHeight
 
-// 跳转到登录页面
-const goToLogin = () => {
-  router.push('/admin/login')
-}
+  elements.forEach((element) => {
+    const elementTop = (element as HTMLElement).offsetTop
+    const elementVisible = 150
 
-// 跳转到管理后台
-const goToAdmin = () => {
-  router.push('/admin/dashboard')
-}
-
-// 退出登录
-const handleLogout = async () => {
-  try {
-    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-
-    await logout()
-    localStorage.removeItem('token')
-    localStorage.removeItem('userInfo')
-    userInfo.value = {}
-    ElMessage.success('退出成功')
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('退出失败', error)
+    if (elementTop < windowHeight - elementVisible) {
+      element.classList.add('is-visible')
     }
-  }
-}
-
-// 加载用户信息
-const loadUserInfo = () => {
-  const savedUserInfo = localStorage.getItem('userInfo')
-  if (savedUserInfo) {
-    try {
-      userInfo.value = JSON.parse(savedUserInfo)
-    } catch (e) {
-      console.error('解析用户信息失败', e)
-    }
-  }
+  })
 }
 
 onMounted(() => {
   loadArchive()
   loadCategories()
   loadTags()
-  loadUserInfo()
+
+  // 添加滚动监听
+  window.addEventListener('scroll', handleScrollReveal)
+
+  // 初始触发多次，确保 DOM 渲染完成
+  setTimeout(handleScrollReveal, 100)
+  setTimeout(handleScrollReveal, 300)
+  setTimeout(handleScrollReveal, 500)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScrollReveal)
 })
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
+.archive-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding-top: 72px;
 }
 
-.archive-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  position: relative;
+.main-content {
+  width: 100%;
+  padding: var(--space-12) 0;
+}
+
+.content-container {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-12);
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+.content-left {
   display: flex;
   flex-direction: column;
+  gap: var(--space-12);
 }
 
-.archive-container::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
+/* ----- 英雄区 ----- */
+.hero-section {
+  padding: var(--space-16) 0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.el-container {
+.hero-title {
+  font-family: var(--font-display);
+  font-size: var(--text-7xl);
+  font-weight: var(--font-black);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin: 0 0 var(--space-6);
+}
+
+.title-line {
+  display: block;
+  color: var(--text-primary);
+}
+
+.title-accent {
+  color: var(--accent-gold);
   position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
 }
 
-.el-main {
-  padding: 67px 40px 20px 40px;
-  flex: 1;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* 导航栏样式 */
-.el-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 0;
-  width: 100%;
-  flex-shrink: 0;
-  height: 47px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 47px;
-  padding: 0 40px;
-  gap: 60px;
-  width: 100%;
-}
-
-.site-title {
-  font-size: 22px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 1px;
-  flex-shrink: 0;
-}
-
-.nav-menu {
-  display: flex;
-  gap: 30px;
-  flex: 1;
-  justify-content: center;
-  margin: 0;
-}
-
-.right-section {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.nav-menu a {
-  text-decoration: none;
-  color: #333;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  position: relative;
-  padding: 5px 0;
-}
-
-.nav-menu a::after {
+.title-accent::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: 0.05em;
   left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  transition: width 0.3s ease;
-}
-
-.nav-menu a:hover {
-  color: #4a5568;
-}
-
-.nav-menu a:hover::after {
   width: 100%;
+  height: 0.08em;
+  background: var(--accent-gold);
+  opacity: 0.5;
 }
 
-.user-section {
-  display: flex;
-  align-items: center;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 5px 15px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.user-info:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(52, 73, 94, 0.1) 100%);
-}
-
-.username {
-  font-weight: 500;
-  color: #333;
-  font-size: 14px;
-}
-
-.login-btn {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  border: none;
-  padding: 8px 24px;
-  font-weight: 500;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
-}
-
-/* 主体内容布局 */
-.main-content {
-  display: grid;
-  grid-template-columns: 1fr 350px;
-  gap: 40px;
-  align-items: start;
-  width: 100%;
-  max-width: 100%;
-}
-
-.archive-content {
-  min-height: 0;
-  max-width: 100%;
-}
-
-/* 归档头部 */
-.archive-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 30px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.archive-header h2 {
-  margin: 0 0 15px 0;
-  font-size: 32px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.archive-stats {
-  font-size: 16px;
-  color: #606266;
+.hero-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  color: var(--text-secondary);
   margin: 0;
 }
 
-/* 年份分组 */
+/* ----- 骨架屏 ----- */
+.loading-container {
+  padding: var(--space-8);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+
+.skeleton-year {
+  height: 60px;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-6);
+}
+
+.skeleton-months {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-left: var(--space-8);
+}
+
+.skeleton-month {
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+
+/* ----- 空状态 ----- */
+.empty-state {
+  text-align: center;
+  padding: var(--space-20) var(--space-8);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: var(--space-6);
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ----- 归档时间线 ----- */
+.archive-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
 .year-group {
-  margin-bottom: 20px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  transition: all 0.3s var(--ease-out);
 }
 
 .year-group:hover {
-  box-shadow: 0 8px 30px rgba(74, 85, 104, 0.2);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-lg);
 }
 
-/* 年份头部 */
 .year-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 25px;
+  padding: var(--space-5) var(--space-6);
+  background: rgba(212, 163, 115, 0.03);
+  border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-bottom: 1px solid rgba(74, 85, 104, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.3s var(--ease-out);
 }
 
 .year-header:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
+  background: rgba(212, 163, 115, 0.06);
 }
 
 .year-title {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.year-icon {
-  font-size: 24px;
+  gap: var(--space-4);
 }
 
 .year-text {
-  font-size: 24px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
 }
 
 .year-count {
-  font-size: 14px;
-  color: #909399;
-  font-weight: 500;
-  background: rgba(74, 85, 104, 0.1);
-  padding: 4px 12px;
-  border-radius: 12px;
+  padding: var(--space-1) var(--space-3);
+  background: rgba(212, 163, 115, 0.1);
+  color: var(--accent-gold);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-full);
 }
 
 .toggle-icon {
-  transition: transform 0.3s ease;
-  color: #909399;
+  width: 20px;
+  height: 20px;
+  color: var(--text-tertiary);
+  transition: transform 0.3s var(--ease-out);
 }
 
-.toggle-icon.is-expanded {
+.toggle-icon.is-rotated {
   transform: rotate(180deg);
 }
 
-/* 月份容器 */
 .months-container {
-  padding: 15px;
+  padding: var(--space-4);
 }
 
-/* 月份分组 */
 .month-group {
-  margin-bottom: 10px;
-  border-radius: 12px;
+  margin-bottom: var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: rgba(74, 85, 104, 0.03);
 }
 
 .month-group:last-child {
   margin-bottom: 0;
 }
 
-/* 月份头部 */
 .month-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 15px 20px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 12px;
+  transition: all 0.3s var(--ease-out);
 }
 
 .month-header:hover {
-  background: rgba(74, 85, 104, 0.08);
-}
-
-.month-icon {
-  font-size: 18px;
+  background: rgba(212, 163, 115, 0.05);
 }
 
 .month-text {
-  font-size: 18px;
-  font-weight: 600;
-  color: #4a5568;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
 }
 
 .month-count {
-  font-size: 13px;
-  color: #909399;
   margin-left: auto;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
 }
 
-/* 文章列表 */
 .articles-list {
-  padding: 10px 20px 15px 48px;
+  padding: var(--space-3) var(--space-4) var(--space-4) var(--space-5);
 }
 
-/* 单篇文章 */
-.archive-article {
-  margin-bottom: 12px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+.article-item {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-2);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all 0.3s var(--ease-out);
 }
 
-.archive-article:last-child {
+.article-item:hover {
+  border-color: var(--border-accent);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+.article-item:last-child {
   margin-bottom: 0;
 }
 
-.article-link {
-  display: block;
-  text-decoration: none;
-  padding: 12px 16px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  background: white;
-  border: 1px solid rgba(74, 85, 104, 0.1);
-}
-
-.article-link:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-color: rgba(74, 85, 104, 0.2);
-  transform: translateX(5px);
-}
-
 .article-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-  line-height: 1.5;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
 }
 
 .article-meta {
   display: flex;
   align-items: center;
-  gap: 15px;
-  font-size: 13px;
-  color: #909399;
-  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
 }
 
 .meta-date,
 .meta-category,
-.meta-views,
-.meta-tags {
+.meta-views {
   display: flex;
   align-items: center;
-  gap: 4px;
 }
 
 .meta-category {
-  color: #4a5568;
+  color: var(--accent-gold);
 }
 
-.meta-category .category-link {
-  text-decoration: none;
-  color: #4a5568;
-  font-weight: 500;
-  transition: color 0.3s ease;
+/* ----- 响应式 ----- */
+@media (max-width: 1280px) {
+  .content-container {
+    grid-template-columns: 1fr 320px;
+  }
+
+  .hero-title {
+    font-size: var(--text-6xl);
+  }
 }
 
-.meta-category .category-link:hover {
-  color: #409eff;
-  text-decoration: underline;
-}
-
-.meta-views {
-  color: #67c23a;
-}
-
-/* 侧边栏样式 */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.sidebar-card {
-  margin-bottom: 0;
-  border-radius: 16px;
-  border: none;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.sidebar-card:hover {
-  box-shadow: 0 8px 30px rgba(74, 85, 104, 0.15);
-}
-
-.sidebar-card :deep(.el-card__header) {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-bottom: 1px solid rgba(74, 85, 104, 0.1);
-  padding: 18px 20px;
-}
-
-.sidebar-card h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.sidebar-card :deep(.el-card__body) {
-  padding: 20px;
-}
-
-.category-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.category-list li {
-  padding: 0;
-}
-
-.category-list a {
-  text-decoration: none;
-  color: #333;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.category-list a:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
-  color: #4a5568;
-  transform: translateX(5px);
-}
-
-.category-list .count {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  color: white;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.tag-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.tag-item {
-  cursor: pointer;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
-  border-color: transparent;
-  color: #4a5568;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.tag-item:hover {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  color: white;
-  transform: scale(1.05);
-}
-
-/* 加载和空状态 */
-.loading-container {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.empty-icon {
-  font-size: 72px;
-  margin-bottom: 20px;
-  opacity: 0.5;
-}
-
-.empty-text {
-  font-size: 18px;
-  color: #909399;
-}
-
-/* 页脚 */
-.el-footer {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  text-align: center;
-  color: #909399;
-  padding: 20px 40px;
-  border-top: 1px solid rgba(74, 85, 104, 0.1);
-  flex-shrink: 0;
-}
-
-/* 响应式设计 */
 @media (max-width: 1024px) {
-  .main-content {
-    grid-template-columns: 1fr 300px;
-    gap: 30px;
+  .content-container {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
+  .archive-page {
+    padding-top: 60px;
+  }
+
+  .content-container {
+    padding: 0 var(--space-5);
+  }
+
   .main-content {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    padding: var(--space-8) 0;
   }
 
-  .header-content {
-    flex-wrap: wrap;
-    height: auto;
-    padding: 15px 20px;
-    gap: 15px;
+  .hero-section {
+    padding: var(--space-10) 0;
   }
 
-  .site-title {
-    font-size: 18px;
+  .hero-title {
+    font-size: var(--text-4xl);
   }
 
-  .nav-menu {
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    order: 3;
-    width: 100%;
-  }
-
-  .right-section {
-    order: 2;
-  }
-
-  .user-info .username {
-    display: none;
-  }
-
-  .el-main {
-    padding: 62px 20px 15px 20px;
-  }
-
-  .el-header {
-    height: auto;
-    min-height: 47px;
-  }
-
-  .archive-header h2 {
-    font-size: 24px;
-  }
-
-  .year-header {
-    padding: 15px 20px;
-  }
-
-  .year-text {
-    font-size: 20px;
-  }
-
-  .articles-list {
-    padding-left: 20px;
+  .hero-subtitle {
+    font-size: var(--text-base);
   }
 
   .article-meta {
-    font-size: 12px;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: var(--space-2);
   }
 }
 </style>

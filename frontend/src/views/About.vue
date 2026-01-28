@@ -1,635 +1,463 @@
 <template>
   <div class="about-page">
-    <el-container>
-      <el-header>
-        <div class="header-content">
-          <h1 class="site-title">
-            <router-link to="/">Syh Blog</router-link>
-          </h1>
-          <nav class="nav-menu">
-            <router-link to="/">🏠 首页</router-link>
-            <router-link to="/category">📂 分类</router-link>
-            <router-link to="/tag">🏷️ 标签</router-link>
-            <router-link to="/archive">📦 归档</router-link>
-            <router-link to="/about">👤 关于</router-link>
-          </nav>
-          <div class="right-section">
-            <div class="user-section">
-              <template v-if="isLoggedIn">
-                <el-dropdown>
-                  <span class="user-info">
-                    <el-avatar :size="32" :src="userInfo.avatar || defaultAvatar" />
-                    <span class="username">{{ userInfo.nickname || '管理员' }}</span>
-                  </span>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item @click="goToAdmin">
-                        🎯 管理后台
-                      </el-dropdown-item>
-                      <el-dropdown-item divided @click="handleLogout">
-                        🚪 退出登录
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </template>
-              <template v-else>
-                <el-button type="primary" @click="goToLogin" class="login-btn">
-                  🔐 登录
-                </el-button>
-              </template>
-            </div>
+    <AppHeader />
+
+    <main class="main-content">
+      <!-- 英雄区 -->
+      <section class="hero-section">
+        <div class="hero-container">
+          <div class="hero-avatar">
+            <span class="avatar-symbol">§</span>
           </div>
+          <h1 class="hero-title">
+            <span class="title-line">关于</span>
+            <span class="title-line title-accent">我</span>
+          </h1>
+          <p class="hero-subtitle">欢迎来到这里</p>
         </div>
-      </el-header>
+      </section>
 
-      <el-main>
-        <div class="about-content">
-          <el-card class="main-card">
-            <div class="about-header">
-              <h1 class="about-title">关于我</h1>
-              <p class="about-subtitle">很高兴遇见你 ✨</p>
+      <!-- 主内容区 -->
+      <div class="content-wrapper">
+        <div class="content-main">
+          <!-- 问候卡片 -->
+          <section class="content-card">
+            <div class="card-content">
+              <h2 class="section-title">你好 👋</h2>
+              <p class="section-text">
+                这里是 Syh Blog。我记录技术，分享思考。
+              </p>
+              <p class="section-text">
+                希望这里的某些文字，能给你带来一点启发或帮助。
+              </p>
             </div>
+          </section>
 
-            <div class="about-section">
-              <h2>👋 你好呀！</h2>
-              <p>欢迎来到我的小天地。这里是 Syh Blog，一个承载我思考和记录的角落。</p>
-              <p>我会在这里分享技术学习笔记、生活感悟和一些碎碎念。希望这些文字能给你带来一些启发和帮助。</p>
+          <!-- 技术栈 -->
+          <section class="content-card">
+            <div class="card-header">
+              <h2 class="card-title">🚀 技术栈</h2>
             </div>
-
-            <div class="about-section">
-              <h2>🚀 技术栈</h2>
-
-              <div class="tech-stack">
-                <div class="tech-category">
-                  <h3>前端技术</h3>
-                  <div class="tech-items">
-                    <div class="tech-item">
-                      <div class="tech-icon">🎨</div>
-                      <div class="tech-info">
-                        <h4>Vue 3</h4>
-                        <p>采用 Composition API 和 TypeScript 开发</p>
-                      </div>
+            <div class="tech-grid">
+              <div class="tech-category">
+                <h3 class="category-title">前端技术</h3>
+                <div class="tech-list">
+                  <div class="tech-item">
+                    <div class="tech-icon">🎨</div>
+                    <div class="tech-info">
+                      <h4>Vue 3</h4>
+                      <p>Composition API + TypeScript</p>
                     </div>
-                    <div class="tech-item">
-                      <div class="tech-icon">⚡</div>
-                      <div class="tech-info">
-                        <h4>Vite</h4>
-                        <p>新一代前端构建工具，极速热更新</p>
-                      </div>
+                  </div>
+                  <div class="tech-item">
+                    <div class="tech-icon">⚡</div>
+                    <div class="tech-info">
+                      <h4>Vite</h4>
+                      <p>极速热更新</p>
                     </div>
-                    <div class="tech-item">
-                      <div class="tech-icon">🎯</div>
-                      <div class="tech-info">
-                        <h4>Element Plus</h4>
-                        <p>基于 Vue 3 的组件库</p>
-                      </div>
+                  </div>
+                  <div class="tech-item">
+                    <div class="tech-icon">🎯</div>
+                    <div class="tech-info">
+                      <h4>Element Plus</h4>
+                      <p>Vue 3 组件库</p>
                     </div>
-                    <div class="tech-item">
-                      <div class="tech-icon">📦</div>
-                      <div class="tech-info">
-                        <h4>Pinia</h4>
-                        <p>Vue 3 官方推荐的状态管理方案</p>
-                      </div>
+                  </div>
+                  <div class="tech-item">
+                    <div class="tech-icon">📦</div>
+                    <div class="tech-info">
+                      <h4>Pinia</h4>
+                      <p>状态管理</p>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div class="tech-category">
-                  <h3>后端技术</h3>
-                  <div class="tech-items">
-                    <div class="tech-item">
-                      <div class="tech-icon">☕</div>
-                      <div class="tech-info">
-                        <h4>Spring Boot</h4>
-                        <p>Java 企业级开发框架</p>
-                      </div>
+              <div class="tech-category">
+                <h3 class="category-title">后端技术</h3>
+                <div class="tech-list">
+                  <div class="tech-item">
+                    <div class="tech-icon">☕</div>
+                    <div class="tech-info">
+                      <h4>Spring Boot</h4>
+                      <p>Java 企业级框架</p>
                     </div>
-                    <div class="tech-item">
-                      <div class="tech-icon">🗄️</div>
-                      <div class="tech-info">
-                        <h4>PostgreSQL</h4>
-                        <p>强大的开源关系型数据库</p>
-                      </div>
+                  </div>
+                  <div class="tech-item">
+                    <div class="tech-icon">🗄️</div>
+                    <div class="tech-info">
+                      <h4>PostgreSQL</h4>
+                      <p>关系型数据库</p>
                     </div>
-                    <div class="tech-item">
-                      <div class="tech-icon">🔴</div>
-                      <div class="tech-info">
-                        <h4>Redis</h4>
-                        <p>高性能缓存中间件</p>
-                      </div>
+                  </div>
+                  <div class="tech-item">
+                    <div class="tech-icon">🔴</div>
+                    <div class="tech-info">
+                      <h4>Redis</h4>
+                      <p>缓存中间件</p>
                     </div>
-                    <div class="tech-item">
-                      <div class="tech-icon">🔐</div>
-                      <div class="tech-info">
-                        <h4>Spring Security</h4>
-                        <p>安全认证与授权框架</p>
-                      </div>
+                  </div>
+                  <div class="tech-item">
+                    <div class="tech-icon">🔐</div>
+                    <div class="tech-info">
+                      <h4>Spring Security</h4>
+                      <p>安全认证</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+          </section>
 
-            <div class="about-section">
-              <h2>✨ 我能帮你做什么？</h2>
-              <ul class="feature-list">
-                <li>
-                  <span class="feature-icon">📝</span>
-                  <div class="feature-content">
-                    <h4>陪你阅读</h4>
-                    <p>这里收录了我的学习笔记、技术总结和生活感悟，随时欢迎你来逛逛</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="feature-icon">💬</span>
-                  <div class="feature-content">
-                    <h4>倾听声音</h4>
-                    <p>每篇文章都期待你的声音，无论是赞同还是质疑，我很乐意和你交流</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="feature-icon">🔍</span>
-                  <div class="feature-content">
-                    <h4>帮你找东西</h4>
-                    <p>在海量的文字中迷失了？用搜索功能，帮你快速找到感兴趣的内容</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="feature-icon">📂</span>
-                  <div class="feature-content">
-                    <h4>整理归档</h4>
-                    <p>按主题分类，贴好标签，让知识更有序。或者按时间浏览，看看成长轨迹</p>
-                  </div>
-                </li>
-              </ul>
+          <!-- 功能列表 -->
+          <section class="content-card">
+            <div class="card-header">
+              <h2 class="card-title">这里有什么</h2>
             </div>
-
-            <div class="about-section">
-              <h2>💻 关于技术</h2>
-              <div class="design-philosophy">
-                <p>这个博客是用 <strong>Vue 3</strong> 和 <strong>Spring Boot</strong> 搭建的。选择这些技术，是因为它们足够灵活、高效，让我能专注于内容创作本身。</p>
-                <p>如果你对技术细节感兴趣，欢迎去我的 GitHub 看看，代码都是开源的 😊</p>
+            <div class="feature-grid">
+              <div class="feature-card">
+                <span class="feature-icon">📝</span>
+                <h4 class="feature-title">技术文章</h4>
+                <p class="feature-desc">学习笔记与实践总结</p>
+              </div>
+              <div class="feature-card">
+                <span class="feature-icon">💭</span>
+                <h4 class="feature-title">思考感悟</h4>
+                <p class="feature-desc">生活中的碎片记录</p>
+              </div>
+              <div class="feature-card">
+                <span class="feature-icon">💬</span>
+                <h4 class="feature-title">评论交流</h4>
+                <p class="feature-desc">期待你的声音</p>
+              </div>
+              <div class="feature-card">
+                <span class="feature-icon">🔍</span>
+                <h4 class="feature-title">归档检索</h4>
+                <p class="feature-desc">按分类与标签查找</p>
               </div>
             </div>
+          </section>
 
-            <div class="about-section">
-              <h2>📮 找到我</h2>
-              <div class="contact-grid">
-                <div class="contact-card">
-                  <div class="contact-icon">🐙</div>
-                  <h4>GitHub</h4>
-                  <p>github.com/namesunyahui</p>
-                </div>
-                <div class="contact-card">
-                  <div class="contact-icon">📧</div>
-                  <h4>邮箱</h4>
-                  <p>sunyahui2026@163.com</p>
-                </div>
-              </div>
+          <!-- 技术说明 -->
+          <section class="content-card">
+            <div class="card-header">
+              <h2 class="card-title">技术实现</h2>
             </div>
+            <div class="design-philosophy">
+              <p>前端 Vue 3，后端 Spring Boot，数据存储 PostgreSQL。</p>
+              <p>代码开源在 GitHub，欢迎交流。</p>
+            </div>
+          </section>
 
-            <div class="about-footer">
-              <p>感谢你的来访 🙏</p>
-              <p>希望这里的某些文字，能在某个时刻，给你带来一丝温暖或启发</p>
-              <p class="signature">—— Syh</p>
+          <!-- 联系方式 -->
+          <section class="content-card">
+            <div class="card-header">
+              <h2 class="card-title">📮 找到我</h2>
             </div>
-          </el-card>
+            <div class="contact-grid">
+              <a
+                href="https://github.com/namesunyahui"
+                target="_blank"
+                class="contact-link cursor-interactive"
+                data-cursor-label="访问"
+              >
+                <div class="contact-icon">🐙</div>
+                <h4 class="contact-title">GitHub</h4>
+                <p class="contact-desc">github.com/namesunyahui</p>
+              </a>
+              <a
+                href="mailto:sunyahui2026@163.com"
+                class="contact-link cursor-interactive"
+                data-cursor-label="邮件"
+              >
+                <div class="contact-icon">📧</div>
+                <h4 class="contact-title">邮箱</h4>
+                <p class="contact-desc">sunyahui2026@163.com</p>
+              </a>
+            </div>
+          </section>
+
+          <!-- 结尾 -->
+          <section class="footer-section">
+            <p class="footer-text">感谢来访</p>
+            <p class="footer-signature">— Syh</p>
+          </section>
         </div>
-      </el-main>
-
-      <el-footer>
-        <p>&copy; 2025 Syh Blog. 用心记录，用爱分享 ✨</p>
-      </el-footer>
-    </el-container>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { logout } from '@/api/auth'
-
-const router = useRouter()
-const userInfo = ref<any>({})
-
-const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-
-// 检查登录状态
-const isLoggedIn = computed(() => {
-  return !!localStorage.getItem('token')
-})
-
-// 跳转到登录页面
-const goToLogin = () => {
-  router.push('/admin/login')
-}
-
-// 跳转到管理后台
-const goToAdmin = () => {
-  router.push('/admin/dashboard')
-}
-
-// 退出登录
-const handleLogout = async () => {
-  try {
-    await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-
-    await logout()
-    localStorage.removeItem('token')
-    localStorage.removeItem('userInfo')
-    userInfo.value = {}
-    ElMessage.success('退出成功')
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('退出失败', error)
-    }
-  }
-}
-
-// 加载用户信息
-const loadUserInfo = () => {
-  const savedUserInfo = localStorage.getItem('userInfo')
-  if (savedUserInfo) {
-    try {
-      userInfo.value = JSON.parse(savedUserInfo)
-    } catch (e) {
-      console.error('解析用户信息失败', e)
-    }
-  }
-}
-
-onMounted(() => {
-  loadUserInfo()
-})
+import AppHeader from '@/components/AppHeader.vue'
 </script>
 
 <style scoped>
 .about-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  background: var(--bg-primary);
+  padding-top: 72px;
 }
 
-.about-page::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.el-container {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.el-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 0;
+.main-content {
   width: 100%;
-  flex-shrink: 0;
-  height: 47px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
 }
 
-.header-content {
+/* ----- 英雄区 ----- */
+.hero-section {
+  padding: var(--space-20) 0;
+  text-align: center;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.hero-container {
+  max-width: var(--container-md);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.hero-avatar {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto var(--space-8);
+  background: var(--accent-gold);
+  border-radius: var(--radius-full);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 47px;
-  padding: 0 40px;
-  gap: 60px;
-  width: 100%;
-}
-
-.site-title a {
-  text-decoration: none;
-  color: #4a5568;
-  font-size: 22px;
-  font-weight: bold;
-  display: block;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.nav-menu {
-  display: flex;
-  gap: 30px;
-  flex: 1;
   justify-content: center;
+  box-shadow: var(--shadow-glow);
+  animation: scaleIn 0.6s var(--ease-out);
+}
+
+.avatar-symbol {
+  font-family: var(--font-display);
+  font-size: var(--text-5xl);
+  font-weight: var(--font-bold);
+  color: var(--bg-primary);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: var(--text-8xl);
+  font-weight: var(--font-black);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  margin: 0 0 var(--space-6);
+}
+
+.title-line {
+  display: block;
+  color: var(--text-primary);
+}
+
+.title-accent {
+  color: var(--accent-gold);
+  position: relative;
+}
+
+.title-accent::after {
+  content: '';
+  position: absolute;
+  bottom: 0.05em;
+  left: 0;
+  width: 100%;
+  height: 0.08em;
+  background: var(--accent-gold);
+  opacity: 0.5;
+}
+
+.hero-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  color: var(--text-secondary);
   margin: 0;
 }
 
-.nav-menu a {
-  text-decoration: none;
-  color: #333;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  position: relative;
-  padding: 5px 0;
-}
-
-.nav-menu a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  transition: width 0.3s ease;
-}
-
-.nav-menu a:hover {
-  color: #4a5568;
-}
-
-.nav-menu a:hover::after {
-  width: 100%;
-}
-
-.right-section {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.user-section {
-  display: flex;
-  align-items: center;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 5px 15px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.user-info:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(52, 73, 94, 0.1) 100%);
-}
-
-.username {
-  font-weight: 500;
-  color: #333;
-  font-size: 14px;
-}
-
-.login-btn {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  border: none;
-  padding: 8px 24px;
-  font-weight: 500;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
-}
-
-.el-main {
-  padding: 87px 20px 40px 20px;
-  flex: 1;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.about-content {
-  max-width: 900px;
+/* ----- 内容区 ----- */
+.content-wrapper {
+  max-width: var(--content-narrow);
   margin: 0 auto;
+  padding: var(--space-16) var(--space-6);
 }
 
-.main-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  border: none;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.main-card :deep(.el-card__body) {
-  padding: 50px;
-}
-
-.about-header {
-  text-align: center;
-  margin-bottom: 50px;
-  padding-bottom: 30px;
-  border-bottom: 2px solid rgba(74, 85, 104, 0.1);
-}
-
-.about-title {
-  font-size: 42px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 15px;
-}
-
-.about-subtitle {
-  font-size: 18px;
-  color: #909399;
-  font-weight: 500;
-}
-
-.about-section {
-  margin-bottom: 40px;
-}
-
-.about-section h2 {
-  font-size: 28px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.about-section p {
-  line-height: 1.8;
-  color: #606266;
-  margin-bottom: 15px;
-  font-size: 16px;
-}
-
-.tech-stack {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 30px;
-  margin-top: 20px;
-}
-
-.tech-category h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #409eff;
-  margin-bottom: 15px;
-}
-
-.tech-items {
+.content-main {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--space-10);
+}
+
+/* ----- 内容卡片 ----- */
+.content-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all 0.3s var(--ease-out);
+}
+
+.content-card:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(212, 163, 115, 0.03);
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.card-content {
+  padding: var(--space-6);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-5);
+}
+
+.section-text {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.section-text:last-child {
+  margin-bottom: 0;
+}
+
+/* ----- 技术栈 ----- */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-8);
+  padding: var(--space-6);
+}
+
+.category-title {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--accent-gold);
+  margin: 0 0 var(--space-5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tech-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 .tech-item {
   display: flex;
-  align-items: start;
-  gap: 15px;
-  padding: 15px;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s var(--ease-out);
 }
 
 .tech-item:hover {
-  transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(74, 85, 104, 0.1);
+  border-color: var(--border-accent);
+  transform: translateX(4px);
 }
 
 .tech-icon {
-  font-size: 32px;
+  font-size: var(--text-3xl);
   flex-shrink: 0;
 }
 
 .tech-info h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 5px;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-1);
 }
 
 .tech-info p {
-  font-size: 14px;
-  color: #909399;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
   margin: 0;
 }
 
-.feature-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.feature-list li {
-  display: flex;
-  align-items: start;
-  gap: 15px;
-  padding: 20px;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.feature-list li:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(74, 85, 104, 0.15);
-}
-
-.feature-icon {
-  font-size: 36px;
-  flex-shrink: 0;
-}
-
-.feature-content h4 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 8px;
-}
-
-.feature-content p {
-  margin: 0;
-  font-size: 15px;
-  color: #606266;
-}
-
+/* ----- 功能网格 ----- */
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+  padding: var(--space-6);
 }
 
 .feature-card {
   text-align: center;
-  padding: 30px 20px;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(74, 85, 104, 0.1);
+  padding: var(--space-6);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  transition: all 0.3s var(--ease-out);
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(74, 85, 104, 0.2);
-  border-color: rgba(74, 85, 104, 0.3);
+  border-color: var(--border-accent);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
-.feature-card-icon {
+.feature-icon {
   font-size: 48px;
-  margin-bottom: 15px;
+  display: block;
+  margin-bottom: var(--space-4);
 }
 
-.feature-card h4 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 10px;
+.feature-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2);
 }
 
-.feature-card p {
+.feature-desc {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: 1.6;
   margin: 0;
-  font-size: 14px;
-  color: #909399;
 }
 
+/* ----- 设计理念 ----- */
 .design-philosophy {
-  padding: 25px;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-radius: 8px;
-  border-left: 4px solid #4a5568;
+  padding: var(--space-6);
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-gold);
+  border-radius: var(--radius-lg);
 }
 
 .design-philosophy p {
-  margin-bottom: 12px;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
 }
 
 .design-philosophy p:last-child {
@@ -637,193 +465,141 @@ onMounted(() => {
 }
 
 .design-philosophy strong {
-  color: #4a5568;
-  font-weight: 600;
+  color: var(--accent-gold);
+  font-weight: var(--font-semibold);
 }
 
-.about-footer {
-  text-align: center;
-  margin-top: 50px;
-  padding-top: 30px;
-  border-top: 2px solid rgba(74, 85, 104, 0.1);
-}
-
-.about-footer p {
-  color: #909399;
-  font-size: 15px;
-  margin-bottom: 8px;
-}
-
-.about-footer p:last-child {
-  margin-bottom: 0;
-}
-
-.about-footer .signature {
-  font-size: 16px;
-  color: #4a5568;
-  font-weight: 600;
-  margin-top: 8px;
-}
-
-/* 联系方式网格 */
+/* ----- 联系方式 ----- */
 .contact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+  padding: var(--space-6);
 }
 
-.contact-card {
+.contact-link {
+  display: block;
   text-align: center;
-  padding: 30px 20px;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(74, 85, 104, 0.1);
+  padding: var(--space-6);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  transition: all 0.3s var(--ease-out);
 }
 
-.contact-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(74, 85, 104, 0.2);
-  border-color: rgba(74, 85, 104, 0.3);
+.contact-link:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
 .contact-icon {
   font-size: 48px;
-  margin-bottom: 15px;
+  display: block;
+  margin-bottom: var(--space-4);
 }
 
-.contact-card h4 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 10px;
+.contact-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2);
 }
 
-.contact-card p {
+.contact-desc {
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
   margin: 0;
-  font-size: 14px;
-  color: #606266;
   word-break: break-all;
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .header-content {
-    flex-wrap: wrap;
-    height: auto;
-    padding: 15px 20px;
-    gap: 15px;
-  }
+/* ----- 页脚 ----- */
+.footer-section {
+  text-align: center;
+  padding: var(--space-10) var(--space-6);
+  border-top: 1px solid var(--border-subtle);
+}
 
-  .site-title a {
-    font-size: 18px;
-  }
+.footer-text {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin: 0 0 var(--space-2);
+}
 
-  .nav-menu {
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    order: 3;
-    width: 100%;
-  }
+.footer-text:last-child {
+  margin-bottom: 0;
+}
 
-  .right-section {
-    order: 2;
-  }
+.footer-signature {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--accent-gold);
+  margin-top: var(--space-4);
+}
 
-  .user-info .username {
-    display: none;
-  }
-
-  .el-header {
-    height: auto;
-    min-height: 47px;
-  }
-
-  .el-main {
-    padding: 62px 20px 15px 20px;
-  }
-
-  .main-card :deep(.el-card__body) {
-    padding: 30px 20px;
-  }
-
-  .about-title {
-    font-size: 32px;
-  }
-
-  .about-subtitle {
-    font-size: 16px;
-  }
-
-  .about-section h2 {
-    font-size: 24px;
-  }
-
-  .tech-stack {
+/* ----- 响应式 ----- */
+@media (max-width: 1024px) {
+  .tech-grid {
     grid-template-columns: 1fr;
   }
 
   .feature-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-page {
+    padding-top: 60px;
+  }
+
+  .hero-section {
+    padding: var(--space-12) 0;
+  }
+
+  .hero-title {
+    font-size: var(--text-6xl);
+  }
+
+  .hero-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .avatar-symbol {
+    font-size: var(--text-4xl);
+  }
+
+  .content-wrapper {
+    padding: var(--space-10) var(--space-5);
   }
 
   .contact-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hero-subtitle {
+    font-size: var(--text-base);
   }
 }
 
 @media (max-width: 480px) {
-  .header-content {
-    padding: 15px;
+  .hero-title {
+    font-size: var(--text-4xl);
   }
 
-  .el-main {
-    padding: 20px 15px;
+  .card-title {
+    font-size: var(--text-xl);
   }
 
-  .main-card :deep(.el-card__body) {
-    padding: 25px 15px;
+  .section-title {
+    font-size: var(--text-2xl);
   }
-
-  .about-title {
-    font-size: 28px;
-  }
-
-  .about-subtitle {
-    font-size: 14px;
-  }
-
-  .about-section h2 {
-    font-size: 22px;
-  }
-
-  .feature-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .contact-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .nav-menu {
-    gap: 10px;
-  }
-
-  .nav-menu a {
-    font-size: 14px;
-  }
-}
-
-/* Footer */
-.el-footer {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  text-align: center;
-  color: #909399;
-  padding: 20px 40px;
-  border-top: 1px solid rgba(74, 85, 104, 0.1);
-  flex-shrink: 0;
 }
 </style>

@@ -1,232 +1,129 @@
 <template>
   <div class="category-page">
-    <el-container>
-      <el-header>
-        <div class="header-content">
-          <h1 class="site-title">Syh Blog</h1>
-          <nav class="nav-menu">
-            <router-link to="/">🏠 首页</router-link>
-            <router-link to="/category">📂 分类</router-link>
-            <router-link to="/tag">🏷️ 标签</router-link>
-            <router-link to="/archive">📦 归档</router-link>
-            <router-link to="/about">👤 关于</router-link>
-          </nav>
-          <div class="right-section">
-            <div class="user-section">
-              <template v-if="isLoggedIn">
-                <el-dropdown>
-                  <span class="user-info">
-                    <el-avatar :size="32" :src="userInfo.avatar || defaultAvatar" />
-                    <span class="username">{{ userInfo.nickname || '管理员' }}</span>
-                  </span>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item @click="goToAdmin">
-                        🎯 管理后台
-                      </el-dropdown-item>
-                      <el-dropdown-item divided @click="handleLogout">
-                        🚪 退出登录
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </template>
-              <template v-else>
-                <el-button type="primary" @click="goToLogin" class="login-btn">
-                  🔐 登录
-                </el-button>
-              </template>
-            </div>
-          </div>
-        </div>
-      </el-header>
+    <AppHeader />
 
-      <el-main>
-        <div class="main-content">
-          <div class="content-wrapper">
-            <!-- 分类列表 -->
-            <div class="category-section">
-              <!-- 加载状态 -->
-              <div v-if="loading" class="skeleton-container">
-                <el-skeleton v-for="i in 6" :key="i" animated>
-                  <template #template>
-                    <el-skeleton-item variant="rect" style="width: 100%; height: 60px; margin-bottom: 12px; border-radius: 8px;" />
-                  </template>
-                </el-skeleton>
-              </div>
+    <main class="main-content">
+      <div class="content-container">
+        <!-- 左侧内容区 -->
+        <div class="content-left">
+          <!-- 英雄区 -->
+          <section class="hero-section scroll-reveal">
+            <h1 class="hero-title">
+              <span class="title-line">文章</span>
+              <span class="title-line title-accent">分类</span>
+            </h1>
+            <p class="hero-subtitle">
+              浏览 {{ totalCount }} 篇文章，分布在 {{ categories.length }} 个分类中
+            </p>
+          </section>
 
-              <!-- 空状态 -->
-              <div v-else-if="categories.length === 0" class="empty-state">
-                <div class="empty-icon">📂</div>
-                <div class="empty-text">暂无分类</div>
-              </div>
-
-              <!-- 分类卡片列表 -->
-              <div v-else class="category-grid">
-                <el-card
-                  v-for="category in categories"
-                  :key="category.id"
-                  class="category-card"
-                  :class="{ active: selectedCategoryId === category.id }"
-                  shadow="hover"
-                  @click="handleCategoryClick(category)"
-                >
-                  <div class="category-info">
-                    <div class="category-name">
-                      <span class="category-icon">{{ getCategoryIcon(category.name) }}</span>
-                      {{ category.name }}
-                    </div>
-                    <div class="category-count">{{ category.articleCount || 0 }} 篇文章</div>
-                  </div>
-                  <div v-if="category.description" class="category-description">
-                    {{ category.description }}
-                  </div>
-                </el-card>
-              </div>
+          <!-- 分类网格 -->
+          <section class="categories-section scroll-reveal">
+            <!-- 加载状态 -->
+            <div v-if="loading" class="skeleton-grid">
+              <div v-for="i in 6" :key="i" class="skeleton-card skeleton"></div>
             </div>
 
-            <!-- 分类文章列表 -->
-            <div v-if="selectedCategoryId" class="articles-section">
-              <div class="section-header">
-                <h2 class="section-title">
-                  <span class="title-icon">📝</span>
-                  {{ currentCategory?.name }} - 文章列表
-                </h2>
-                <el-button size="small" @click="handleClearCategory" v-if="selectedCategoryId">
-                  清除筛选
-                </el-button>
+            <!-- 空状态 -->
+            <div v-else-if="categories.length === 0" class="empty-state">
+              <div class="empty-icon">📂</div>
+              <h3 class="empty-title">暂无分类</h3>
+              <p class="empty-text">还没有创建任何文章分类</p>
+            </div>
+
+            <!-- 分类卡片 -->
+            <div v-else class="category-grid">
+              <div
+                v-for="category in categories"
+                :key="category.id"
+                class="category-card cursor-interactive"
+                :class="{ 'is-active': selectedCategoryId === category.id }"
+                data-cursor-label="查看文章"
+                @click="handleCategoryClick(category)"
+              >
+                <div class="category-icon">{{ getCategoryIcon(category.name) }}</div>
+                <h3 class="category-name">{{ category.name }}</h3>
+                <p v-if="category.description" class="category-description">{{ category.description }}</p>
+                <div class="category-count">{{ category.articleCount || 0 }} 篇文章</div>
               </div>
+            </div>
+          </section>
 
-              <!-- 文章加载状态 -->
-              <div v-if="articlesLoading" class="skeleton-container">
-                <el-skeleton v-for="i in 3" :key="i" animated>
-                  <template #template>
-                    <el-skeleton-item variant="rect" style="width: 100%; height: 150px; margin-bottom: 16px; border-radius: 12px;" />
-                  </template>
-                </el-skeleton>
-              </div>
+          <!-- 文章列表区域 -->
+          <section v-if="selectedCategoryId" class="articles-section">
+            <div class="section-header">
+              <h2 class="section-title">
+                <span class="title-icon">📝</span>
+                {{ currentCategory?.name }} - 文章列表
+              </h2>
+              <button class="clear-btn" @click="handleClearCategory">
+                清除筛选
+              </button>
+            </div>
 
-              <!-- 文章空状态 -->
-              <div v-else-if="articles.length === 0" class="empty-state">
-                <div class="empty-icon">📝</div>
-                <div class="empty-text">该分类下暂无文章</div>
-              </div>
+            <!-- 文章加载状态 -->
+            <div v-if="articlesLoading" class="loading-state">
+              <div v-for="i in 3" :key="i" class="skeleton-card skeleton"></div>
+            </div>
 
-              <!-- 文章列表 -->
-              <template v-else>
-                <el-card v-for="article in articles" :key="article.id" class="article-card">
-                  <h3 class="article-title">
-                    <router-link :to="`/article/${article.id}`">
-                      {{ article.title }}
-                    </router-link>
-                  </h3>
-                  <div class="article-meta">
-                    <span class="meta-item">
-                      {{ formatDate(article.createdAt) }}
-                    </span>
-                    <span class="meta-item">
-                      {{ article.viewCount }} 阅读
-                    </span>
-                  </div>
-                  <p v-if="article.summary" class="article-summary">{{ article.summary }}</p>
-                  <div class="article-tags" v-if="article.tags && article.tags.length">
-                    <el-tag v-for="tag in article.tags" :key="tag.id" size="small">
-                      {{ tag.name }}
-                    </el-tag>
-                  </div>
-                </el-card>
+            <!-- 文章空状态 -->
+            <div v-else-if="articles.length === 0" class="empty-state">
+              <div class="empty-icon">📝</div>
+              <h3 class="empty-title">该分类下暂无文章</h3>
+            </div>
 
-                <!-- 分页 -->
+            <!-- 文章列表 -->
+            <template v-else>
+              <ArticleCard
+                v-for="article in articles"
+                :key="article.id"
+                :article="article"
+                class="article-item"
+              />
+
+              <!-- 分页 -->
+              <div class="pagination-wrapper">
                 <el-pagination
                   v-model:current-page="currentPage"
                   :page-size="pageSize"
                   :total="total"
                   layout="prev, pager, next"
+                  :background="false"
                   @current-change="handlePageChange"
                 />
-              </template>
+              </div>
+            </template>
+          </section>
+
+          <!-- 提示信息 -->
+          <div v-else class="hint-section scroll-reveal">
+            <div class="hint-card">
+              <div class="hint-icon">👆</div>
+              <p class="hint-text">点击上方分类卡片查看该分类下的文章</p>
             </div>
-
-            <!-- 全部文章列表（未选择分类时） -->
-            <div v-else class="hint-section">
-              <el-card class="hint-card">
-                <div class="hint-content">
-                  <div class="hint-icon">👆</div>
-                  <div class="hint-text">点击上方分类卡片查看该分类下的文章</div>
-                </div>
-              </el-card>
-            </div>
-          </div>
-
-          <!-- 侧边栏 -->
-          <div class="sidebar">
-            <el-card class="sidebar-card">
-              <template #header>
-                <h3>🔍 搜索</h3>
-              </template>
-              <el-input
-                v-model="searchKeyword"
-                placeholder="输入关键词搜索文章..."
-                @keyup.enter="handleSearch"
-                clearable
-              >
-                <template #append>
-                  <el-button :icon="Search" @click="handleSearch">搜索</el-button>
-                </template>
-              </el-input>
-            </el-card>
-
-            <el-card class="sidebar-card">
-              <template #header>
-                <h3>📁 分类</h3>
-              </template>
-              <ul class="category-list" v-if="categories.length">
-                <li v-for="category in categories" :key="category.id">
-                  <router-link :to="{ path: '/category', query: { categoryId: category.id } }">
-                    <span>{{ category.name }}</span>
-                    <span class="count">{{ category.articleCount }}</span>
-                  </router-link>
-                </li>
-              </ul>
-              <div v-else class="empty-state" style="padding: 30px 10px;">
-                <div class="empty-text" style="font-size: 14px;">暂无分类</div>
-              </div>
-            </el-card>
-
-            <el-card class="sidebar-card">
-              <template #header>
-                <h3>🏷️ 标签</h3>
-              </template>
-              <div class="tag-cloud" v-if="tags.length">
-                <el-tag
-                  v-for="tag in tags"
-                  :key="tag.id"
-                  class="tag-item"
-                  @click="handleTagClick(tag.name)"
-                >
-                  {{ tag.name }}
-                </el-tag>
-              </div>
-              <div v-else class="empty-state" style="padding: 30px 10px;">
-                <div class="empty-text" style="font-size: 14px;">暂无标签</div>
-              </div>
-            </el-card>
           </div>
         </div>
-      </el-main>
 
-      <el-footer>
-        <p>&copy; 2025 Syh Blog. 用心记录，用爱分享 ✨</p>
-      </el-footer>
-    </el-container>
+        <!-- 右侧边栏 -->
+        <AppSidebar
+          :categories="categories"
+          :tags="tags"
+          :modelValue="{ searchKeyword }"
+          @update:searchKeyword="searchKeyword = $event"
+          @search="handleSearch"
+        />
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
+import ArticleCard from '@/components/ArticleCard.vue'
 import { getCategoryList } from '@/api/category'
 import { getArticleList } from '@/api/article'
 import { getTagList } from '@/api/tag'
@@ -238,19 +135,10 @@ interface Category {
   articleCount?: number
 }
 
-interface Article {
-  id: number
-  title: string
-  summary?: string
-  viewCount: number
-  createdAt: string
-  tags?: any[]
-}
-
 const router = useRouter()
 const route = useRoute()
 const categories = ref<Category[]>([])
-const articles = ref<Article[]>([])
+const articles = ref<any[]>([])
 const tags = ref<any[]>([])
 const loading = ref(false)
 const articlesLoading = ref(false)
@@ -260,16 +148,12 @@ const pageSize = ref(10)
 const total = ref(0)
 const searchKeyword = ref('')
 
-// 用户相关
-const isLoggedIn = computed(() => !!localStorage.getItem('token'))
-const userInfo = computed(() => {
-  const info = localStorage.getItem('userInfo')
-  return info ? JSON.parse(info) : {}
-})
-const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
-
 const currentCategory = computed(() => {
   return categories.value.find(c => c.id === selectedCategoryId.value)
+})
+
+const totalCount = computed(() => {
+  return categories.value.reduce((sum, cat) => sum + (cat.articleCount || 0), 0)
 })
 
 // 加载分类列表
@@ -282,6 +166,8 @@ const loadCategories = async () => {
     ElMessage.error('加载分类列表失败')
   } finally {
     loading.value = false
+    // 数据加载完成后触发滚动动画
+    setTimeout(handleScrollReveal, 50)
   }
 }
 
@@ -298,9 +184,18 @@ const loadArticles = async (page: number = 1) => {
     })
     articles.value = res.data?.records || []
     total.value = res.data?.total || 0
+
+    // 等待 DOM 更新后直接显示文章区域
+    await nextTick()
+    const articleSection = document.querySelector('.articles-section')
+    if (articleSection) {
+      articleSection.classList.add('is-visible')
+    }
+    // 同时触发滚动动画以确保其他元素可见
+    setTimeout(handleScrollReveal, 50)
   } catch (error) {
     ElMessage.error('加载文章列表失败')
-  } finally {
+    } finally {
     articlesLoading.value = false
   }
 }
@@ -308,16 +203,13 @@ const loadArticles = async (page: number = 1) => {
 // 点击分类
 const handleCategoryClick = (category: Category) => {
   if (selectedCategoryId.value === category.id) {
-    // 如果点击的是已选中的分类，则取消选中
     selectedCategoryId.value = null
     articles.value = []
-    // 清除 URL 查询参数
     router.replace({ path: '/category', query: {} })
   } else {
     selectedCategoryId.value = category.id
     currentPage.value = 1
     loadArticles(1)
-    // 更新 URL 查询参数
     router.replace({ path: '/category', query: { categoryId: category.id } })
   }
 }
@@ -326,7 +218,6 @@ const handleCategoryClick = (category: Category) => {
 const handleClearCategory = () => {
   selectedCategoryId.value = null
   articles.value = []
-  // 清除 URL 查询参数
   router.replace({ path: '/category', query: {} })
 }
 
@@ -334,6 +225,10 @@ const handleClearCategory = () => {
 const handlePageChange = (page: number) => {
   currentPage.value = page
   loadArticles(page)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  // 分页切换后，滚动到顶部并触发动画
+  setTimeout(handleScrollReveal, 300)
+  setTimeout(handleScrollReveal, 500)
 }
 
 // 获取分类图标
@@ -344,35 +239,12 @@ const getCategoryIcon = (name: string) => {
     '学习': '📚',
     '随笔': '✍️',
     '教程': '📖',
-    '分享': '🎁',
-    '默认': '📁'
+    '分享': '🎁'
   }
   return iconMap[name] || '📁'
 }
 
-// 格式化日期
-const formatDate = (date: string) => {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('zh-CN')
-}
-
-// 路由跳转
-const goToLogin = () => {
-  router.push('/admin/login')
-}
-
-const goToAdmin = () => {
-  router.push('/admin/dashboard')
-}
-
-const handleLogout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('userInfo')
-  ElMessage.success('退出登录成功')
-  router.push('/')
-}
-
-// 加载标签列表
+// 加载标签
 const loadTags = async () => {
   try {
     const res = await getTagList()
@@ -382,26 +254,35 @@ const loadTags = async () => {
   }
 }
 
-// 搜索处理
+// 搜索
 const handleSearch = () => {
   if (searchKeyword.value) {
     router.push({ path: '/search', query: { keyword: searchKeyword.value } })
   }
 }
 
-// 标签点击处理
-const handleTagClick = (tagName: string) => {
-  router.push({ path: '/tag', query: { tag: tagName } })
+// 滚动触发动画
+const handleScrollReveal = () => {
+  const elements = document.querySelectorAll('.scroll-reveal')
+  const windowHeight = window.innerHeight
+
+  elements.forEach((element) => {
+    const elementTop = (element as HTMLElement).offsetTop
+    const elementVisible = 150
+
+    if (elementTop < windowHeight - elementVisible) {
+      element.classList.add('is-visible')
+    }
+  })
 }
 
-onMounted(() => {
-  loadCategories()
+onMounted(async () => {
+  await loadCategories()
   loadTags()
-  // 检查 URL 查询参数，如果有 categoryId 则自动选中该分类
+
   const categoryIdFromQuery = route.query.categoryId
   if (categoryIdFromQuery) {
     const categoryId = Number(categoryIdFromQuery)
-    // 延迟执行，确保分类列表已加载
     setTimeout(() => {
       const category = categories.value.find(c => c.id === categoryId)
       if (category) {
@@ -410,9 +291,20 @@ onMounted(() => {
       }
     }, 100)
   }
+
+  // 添加滚动监听
+  window.addEventListener('scroll', handleScrollReveal)
+
+  // 初始触发多次，确保 DOM 渲染完成
+  setTimeout(handleScrollReveal, 100)
+  setTimeout(handleScrollReveal, 300)
+  setTimeout(handleScrollReveal, 500)
 })
 
-// 监听路由查询参数变化
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScrollReveal)
+})
+
 watch(() => route.query.categoryId, (newCategoryId) => {
   if (newCategoryId) {
     const categoryId = Number(newCategoryId)
@@ -423,7 +315,6 @@ watch(() => route.query.categoryId, (newCategoryId) => {
       loadArticles(1)
     }
   } else {
-    // 查询参数被清除，重置状态
     selectedCategoryId.value = null
     articles.value = []
   }
@@ -431,574 +322,374 @@ watch(() => route.query.categoryId, (newCategoryId) => {
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
-}
-
 .category-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.category-page::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.el-container {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* Header */
-.el-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  padding: 0;
-  width: 100%;
-  flex-shrink: 0;
-  height: 47px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 47px;
-  padding: 0 40px;
-  gap: 60px;
-  width: 100%;
-}
-
-.site-title {
-  font-size: 22px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 1px;
-  flex-shrink: 0;
-}
-
-.nav-menu {
-  display: flex;
-  gap: 30px;
-  flex: 1;
-  justify-content: center;
-  margin: 0;
-}
-
-.nav-menu a {
-  text-decoration: none;
-  color: #333;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  position: relative;
-  padding: 5px 0;
-}
-
-.nav-menu a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  transition: width 0.3s ease;
-}
-
-.nav-menu a:hover {
-  color: #4a5568;
-}
-
-.nav-menu a:hover::after {
-  width: 100%;
-}
-
-.right-section {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.user-section {
-  display: flex;
-  align-items: center;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 5px 15px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.user-info:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(52, 73, 94, 0.1) 100%);
-}
-
-.username {
-  font-weight: 500;
-  color: #333;
-  font-size: 14px;
-}
-
-.login-btn {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  border: none;
-  padding: 8px 24px;
-  font-weight: 500;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.login-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
-}
-
-/* Main Content */
-.el-main {
-  padding: 67px 40px 20px 40px;
-  flex: 1;
-  width: 100%;
-  box-sizing: border-box;
+  background: var(--bg-primary);
+  padding-top: 72px;
 }
 
 .main-content {
-  display: grid;
-  grid-template-columns: 1fr 350px;
-  gap: 40px;
-  align-items: start;
   width: 100%;
-  max-width: 100%;
+  padding: var(--space-12) 0;
 }
 
-.content-wrapper {
-  min-height: 0;
-  max-width: 100%;
+.content-container {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-12);
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+.content-left {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: var(--space-12);
 }
 
-/* Section */
-.section-title {
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 24px 0;
+/* ----- 英雄区 ----- */
+.hero-section {
+  padding: var(--space-16) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: var(--text-7xl);
+  font-weight: var(--font-black);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin: 0 0 var(--space-6);
+}
+
+.title-line {
+  display: block;
+  color: var(--text-primary);
+}
+
+.title-accent {
+  color: var(--accent-gold);
+  position: relative;
+}
+
+.title-accent::after {
+  content: '';
+  position: absolute;
+  bottom: 0.05em;
+  left: 0;
+  width: 100%;
+  height: 0.08em;
+  background: var(--accent-gold);
+  opacity: 0.5;
+}
+
+.hero-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ----- 分类网格 ----- */
+.categories-section {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: var(--space-8);
 }
 
-.title-icon {
-  font-size: 32px;
-}
-
-/* Category Grid */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  gap: var(--space-6);
 }
 
 .category-card {
-  cursor: pointer;
-  transition: all 0.3s;
-  border: 2px solid transparent;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  text-align: center;
+  transition: all 0.3s var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--accent-gold) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out);
+  z-index: 0;
+}
+
+.category-card:hover::before {
+  opacity: 0.05;
 }
 
 .category-card:hover {
+  border-color: var(--border-accent);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
 }
 
-.category-card.active {
-  border-color: #4a5568;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-}
-
-.category-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.category-name {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.category-card.is-active {
+  border-color: var(--accent-gold);
+  background: rgba(212, 163, 115, 0.03);
 }
 
 .category-icon {
-  font-size: 24px;
+  font-size: var(--text-5xl);
+  margin-bottom: var(--space-4);
+  position: relative;
+  z-index: 1;
 }
 
-.category-count {
-  font-size: 14px;
-  color: #999;
+.category-name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2);
+  position: relative;
+  z-index: 1;
 }
 
 .category-description {
-  font-size: 14px;
-  color: #666;
-  margin-top: 8px;
-  line-height: 1.5;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: 1.6;
+  margin: 0 0 var(--space-4);
+  position: relative;
+  z-index: 1;
 }
 
-/* Articles Section */
+.category-count {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--accent-gold);
+  font-weight: var(--font-semibold);
+  position: relative;
+  z-index: 1;
+}
+
+/* ----- 文章区域 ----- */
+.articles-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
 }
 
-.article-card {
-  margin-bottom: 20px;
-  border-radius: 16px;
-  border: none;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-}
-
-.article-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(74, 85, 104, 0.2);
-}
-
-.article-card :deep(.el-card__body) {
-  padding: 24px;
-}
-
-.article-title {
-  margin-bottom: 12px;
-}
-
-.article-title a {
-  text-decoration: none;
-  color: #333;
-  font-size: 22px;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.article-title a:hover {
-  color: #4a5568;
-}
-
-.article-meta {
-  color: #909399;
-  font-size: 14px;
-  margin-bottom: 15px;
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-3);
 }
 
-.meta-item {
+.title-icon {
+  font-size: var(--text-2xl);
+}
+
+.clear-btn {
+  padding: var(--space-2) var(--space-5);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  cursor: none;
+  transition: all 0.3s var(--ease-out);
+}
+
+.clear-btn:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+.article-item {
+  animation: cascadeIn 0.6s var(--ease-out) forwards;
+  opacity: 0;
+}
+
+/* ----- 骨架屏 ----- */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+.skeleton-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  height: 200px;
+}
+
+.loading-state {
   display: flex;
-  align-items: center;
-  gap: 5px;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
-.article-meta span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.article-meta span::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  border-radius: 50%;
-}
-
-.article-summary {
-  color: #606266;
-  line-height: 1.8;
-  margin-bottom: 15px;
-  font-size: 15px;
-}
-
-.article-tags {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.article-tags .el-tag {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
-  border-color: transparent;
-  color: #4a5568;
-  font-weight: 500;
-}
-
-/* Pagination */
-.el-pagination {
-  margin-top: 30px;
-  justify-content: center;
-}
-
-.el-pagination :deep(.el-pager li) {
-  border-radius: 8px;
-  font-weight: 500;
-}
-
-.el-pagination :deep(.el-pager li.is-active) {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-}
-
-.el-pagination :deep(.btn-prev),
-.el-pagination :deep(.btn-next) {
-  border-radius: 8px;
-}
-
-/* Empty State */
+/* ----- 空状态 ----- */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: var(--space-20) var(--space-8);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
 }
 
 .empty-icon {
   font-size: 64px;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-6);
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3);
 }
 
 .empty-text {
-  font-size: 18px;
-  color: #999;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  margin: 0;
 }
 
-/* Hint Section */
+/* ----- 提示区域 ----- */
+.hint-section {
+  display: flex;
+  justify-content: center;
+}
+
 .hint-card {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
-  border: 2px dashed #4a5568;
-}
-
-.hint-content {
+  background: var(--bg-card);
+  border: 2px dashed var(--border-accent);
+  border-radius: var(--radius-xl);
+  padding: var(--space-12) var(--space-16);
   text-align: center;
-  padding: 40px 20px;
 }
 
 .hint-icon {
   font-size: 48px;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
 
 .hint-text {
-  font-size: 16px;
-  color: #4a5568;
-  font-weight: 500;
-}
-
-/* Skeleton */
-.skeleton-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Sidebar */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.sidebar-card {
-  margin-bottom: 0;
-  border-radius: 16px;
-  border: none;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.sidebar-card:hover {
-  box-shadow: 0 8px 30px rgba(74, 85, 104, 0.15);
-}
-
-.sidebar-card :deep(.el-card__header) {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.05) 0%, rgba(44, 62, 80, 0.05) 100%);
-  border-bottom: 1px solid rgba(74, 85, 104, 0.1);
-  padding: 18px 20px;
-}
-
-.sidebar-card h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.sidebar-card :deep(.el-card__body) {
-  padding: 20px;
-}
-
-.category-list {
-  list-style: none;
-  padding: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
   margin: 0;
 }
 
-.category-list li {
-  padding: 0;
-}
-
-.category-list a {
-  text-decoration: none;
-  color: #333;
+/* ----- 分页 ----- */
+.pagination-wrapper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  justify-content: center;
+  padding: var(--space-8) 0;
 }
 
-.category-list a:hover {
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
-  color: #4a5568;
-  transform: translateX(5px);
-}
-
-.category-list .count {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  color: white;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.tag-cloud {
+:deep(.el-pagination) {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
-.tag-item {
-  cursor: pointer;
-  background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(44, 62, 80, 0.1) 100%);
-  border-color: transparent;
-  color: #4a5568;
-  font-weight: 500;
-  transition: all 0.3s ease;
+:deep(.el-pagination .btn-prev),
+:deep(.el-pagination .btn-next),
+:deep(.el-pagination .el-pager li) {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-weight: var(--font-medium);
+  border-radius: var(--radius-md);
+  transition: all 0.3s var(--ease-out);
 }
 
-.tag-item:hover {
-  background: linear-gradient(135deg, #4a5568 0%, #2c3e50 100%);
-  color: white;
-  transform: scale(1.05);
+:deep(.el-pagination .btn-prev:hover),
+:deep(.el-pagination .btn-next:hover),
+:deep(.el-pagination .el-pager li:hover) {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
 }
 
-/* Responsive */
+:deep(.el-pagination .el-pager li.is-active) {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  color: var(--bg-primary);
+}
+
+/* ----- 响应式 ----- */
+@media (max-width: 1280px) {
+  .content-container {
+    grid-template-columns: 1fr 320px;
+  }
+
+  .hero-title {
+    font-size: var(--text-6xl);
+  }
+}
+
 @media (max-width: 1024px) {
-  .main-content {
-    grid-template-columns: 1fr 300px;
-    gap: 30px;
+  .content-container {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
+  .category-page {
+    padding-top: 60px;
+  }
+
+  .content-container {
+    padding: 0 var(--space-5);
+  }
+
   .main-content {
+    padding: var(--space-8) 0;
+  }
+
+  .hero-section {
+    padding: var(--space-10) 0;
+  }
+
+  .hero-title {
+    font-size: var(--text-4xl);
+  }
+
+  .category-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
   }
 
-  .header-content {
-    flex-wrap: wrap;
-    height: auto;
-    padding: 15px 20px;
-    gap: 15px;
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
   }
-
-  .site-title {
-    font-size: 18px;
-  }
-
-  .nav-menu {
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    order: 3;
-    width: 100%;
-  }
-
-  .right-section {
-    order: 2;
-  }
-
-  .user-info .username {
-    display: none;
-  }
-
-  .el-main {
-    padding: 62px 20px 15px 20px;
-  }
-
-  .el-header {
-    height: auto;
-    min-height: 47px;
-  }
-}
-
-/* Footer */
-.el-footer {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  text-align: center;
-  color: #909399;
-  padding: 20px 40px;
-  border-top: 1px solid rgba(74, 85, 104, 0.1);
-  flex-shrink: 0;
 }
 </style>
