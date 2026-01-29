@@ -109,4 +109,73 @@ public class UserController {
         boolean exists = userService.existsByEmail(email);
         return Result.success(exists);
     }
+
+    /**
+     * 创建用户（仅超级管理员）
+     */
+    @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public Result<User> createUser(@RequestBody CreateUserRequest request) {
+        User user = userService.createUser(
+            request.getUsername(),
+            request.getPassword(),
+            request.getNickname(),
+            request.getEmail(),
+            request.getRole()
+        );
+        // 隐藏密码字段
+        user.setPassword(null);
+        return Result.success(user);
+    }
+
+    /**
+     * 创建用户请求DTO
+     */
+    public static class CreateUserRequest {
+        private String username;
+        private String password;
+        private String nickname;
+        private String email;
+        private String role;
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getNickname() {
+            return nickname;
+        }
+
+        public void setNickname(String nickname) {
+            this.nickname = nickname;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public void setRole(String role) {
+            this.role = role;
+        }
+    }
 }

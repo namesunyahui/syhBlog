@@ -401,9 +401,11 @@ onMounted(() => {
 .luxury-input :deep(.el-input__wrapper),
 .luxury-textarea :deep(.el-textarea__inner),
 .luxury-select :deep(.el-select__wrapper) {
-  background: rgba(26, 26, 26, 0.8);
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  box-shadow: none;
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.9) 0%, rgba(10, 10, 10, 0.85) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   transition: all 0.3s ease;
 }
@@ -414,9 +416,12 @@ onMounted(() => {
 .luxury-textarea :deep(.el-textarea__inner:focus),
 .luxury-select :deep(.el-select__wrapper):hover,
 .luxury-select :deep(.el-select__wrapper.is-focused) {
-  border-color: rgba(212, 175, 55, 0.5);
-  background: rgba(26, 26, 26, 0.9);
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.6);
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.95) 0%, rgba(10, 10, 10, 0.9) 100%);
+  box-shadow:
+    0 0 0 3px rgba(212, 175, 55, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .luxury-input :deep(.el-input__inner),
@@ -465,40 +470,50 @@ onMounted(() => {
 
 /* 下拉弹出菜单 */
 :deep(.el-select-dropdown) {
-  background: linear-gradient(145deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.96)) !important;
-  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  background: linear-gradient(145deg, rgba(15, 15, 15, 0.98) 0%, rgba(5, 5, 5, 0.96)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
   box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(212, 175, 55, 0.1),
-    0 0 20px rgba(212, 175, 55, 0.05) !important;
+    0 15px 50px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(212, 175, 55, 0.15),
+    0 0 30px rgba(212, 175, 55, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   border-radius: 12px !important;
-  backdrop-filter: blur(20px) !important;
+  backdrop-filter: blur(30px) !important;
   padding: 8px !important;
 }
 
 /* 下拉选项 */
 :deep(.el-select-dropdown__item) {
-  color: rgba(244, 228, 188, 0.85) !important;
+  color: rgba(244, 228, 188, 0.9) !important;
   background: transparent !important;
   border-radius: 8px !important;
-  padding: 10px 16px !important;
+  padding: 11px 16px !important;
   margin: 2px 0 !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.3px !important;
 }
 
 :deep(.el-select-dropdown__item:hover) {
-  background: rgba(212, 175, 55, 0.15) !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.12) 100%) !important;
   color: #f4e4bc !important;
+  transform: translateX(2px);
 }
 
 :deep(.el-select-dropdown__item.is-selected) {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.15) 100%) !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%) !important;
   color: #f4e4bc !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
 :deep(.el-select-dropdown__item.is-selected:hover) {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0.25) 100%) !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.4) 0%, rgba(212, 175, 55, 0.3) 100%) !important;
+  border-color: rgba(212, 175, 55, 0.5) !important;
 }
 
 /* 内容编辑区 */
@@ -774,5 +789,92 @@ onMounted(() => {
     flex: 1;
     min-width: 120px;
   }
+}
+</style>
+
+<style>
+/* ==================== 全局下拉菜单暗色奢华样式 ==================== */
+/* 覆盖 Element Plus 下拉菜单的默认白色样式 */
+
+.el-select-dropdown {
+  background: linear-gradient(145deg, rgba(15, 15, 15, 0.98) 0%, rgba(5, 5, 5, 0.96)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(212, 175, 55, 0.15),
+    0 0 30px rgba(212, 175, 55, 0.1) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(30px) !important;
+  padding: 8px !important;
+}
+
+/* 下拉菜单外层包装 - 移除白色边框 */
+.el-select-dropdown__list,
+.el-select-dropdown__wrap {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 下拉菜单边框 - 移除默认白色边框 */
+.el-select-dropdown .el-scrollbar__wrap,
+.el-select-dropdown .el-scrollbar__view {
+  background: transparent !important;
+  border: none !important;
+}
+
+.el-select-dropdown .el-select-dropdown__list {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* 下拉选项 */
+.el-select-dropdown__item {
+  color: rgba(244, 228, 188, 0.9) !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  margin: 2px 0 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.3px !important;
+  line-height: 1.5 !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.el-select-dropdown__item:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.12) 100%) !important;
+  color: #f4e4bc !important;
+  transform: translateX(2px);
+}
+
+.el-select-dropdown__item.is-selected {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%) !important;
+  color: #f4e4bc !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.el-select-dropdown__item.is-selected:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.4) 0%, rgba(212, 175, 55, 0.3) 100%) !important;
+  border-color: rgba(212, 175, 55, 0.5) !important;
+}
+
+/* 移除下拉面板的所有白色边框 */
+.el-popper.is-light,
+.el-select-dropdown.is-light {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* 下拉箭头样式 */
+.el-select-dropdown__list .el-select-dropdown__item span {
+  line-height: 1.5 !important;
 }
 </style>

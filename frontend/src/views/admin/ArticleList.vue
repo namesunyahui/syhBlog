@@ -401,9 +401,11 @@ onMounted(() => {
 
 .filter-input :deep(.el-input__wrapper),
 .filter-select :deep(.el-select__wrapper) {
-  background: rgba(26, 26, 26, 0.6);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  box-shadow: none;
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.9) 0%, rgba(10, 10, 10, 0.85) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;
 }
 
@@ -411,8 +413,12 @@ onMounted(() => {
 .filter-select :deep(.el-select__wrapper):hover,
 .filter-input :deep(.el-input__wrapper.is-focus),
 .filter-select :deep(.el-select__wrapper.is-focused) {
-  border-color: rgba(212, 175, 55, 0.4);
-  background: rgba(26, 26, 26, 0.8);
+  border-color: rgba(212, 175, 55, 0.6);
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.95) 0%, rgba(10, 10, 10, 0.9) 100%);
+  box-shadow:
+    0 0 0 3px rgba(212, 175, 55, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .filter-input :deep(.el-input__inner),
@@ -425,53 +431,61 @@ onMounted(() => {
 }
 
 /* ==================== 暗色奢华风格下拉框 ==================== */
-.filter-select :deep(.el-select__placeholder),
-.luxury-select :deep(.el-select__placeholder) {
+.filter-select :deep(.el-select__placeholder) {
   color: rgba(244, 228, 188, 0.35);
 }
 
 /* 下拉框图标 */
-.filter-select :deep(.el-select__caret),
-.luxury-select :deep(.el-select__caret) {
+.filter-select :deep(.el-select__caret) {
   color: rgba(212, 175, 55, 0.7);
 }
 
 /* 下拉弹出菜单 */
 :deep(.el-select-dropdown) {
-  background: linear-gradient(145deg, rgba(18, 18, 18, 0.98) 0%, rgba(10, 10, 10, 0.96)) !important;
-  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  background: linear-gradient(145deg, rgba(15, 15, 15, 0.98) 0%, rgba(5, 5, 5, 0.96)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
   box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(212, 175, 55, 0.1),
-    0 0 20px rgba(212, 175, 55, 0.05) !important;
+    0 15px 50px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(212, 175, 55, 0.15),
+    0 0 30px rgba(212, 175, 55, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   border-radius: 12px !important;
-  backdrop-filter: blur(20px) !important;
+  backdrop-filter: blur(30px) !important;
   padding: 8px !important;
 }
 
 /* 下拉选项 */
 :deep(.el-select-dropdown__item) {
-  color: rgba(244, 228, 188, 0.85) !important;
+  color: rgba(244, 228, 188, 0.9) !important;
   background: transparent !important;
   border-radius: 8px !important;
-  padding: 10px 16px !important;
+  padding: 11px 16px !important;
   margin: 2px 0 !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.3px !important;
 }
 
 :deep(.el-select-dropdown__item:hover) {
-  background: rgba(212, 175, 55, 0.15) !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.12) 100%) !important;
   color: #f4e4bc !important;
+  transform: translateX(2px);
 }
 
 :deep(.el-select-dropdown__item.is-selected) {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.15) 100%) !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%) !important;
   color: #f4e4bc !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
 :deep(.el-select-dropdown__item.is-selected:hover) {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0.25) 100%) !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.4) 0%, rgba(212, 175, 55, 0.3) 100%) !important;
+  border-color: rgba(212, 175, 55, 0.5) !important;
 }
 
 /* 多选标签 */
@@ -543,6 +557,43 @@ onMounted(() => {
   padding: 0;
   flex: 1;
   overflow: auto;
+}
+
+/* ==================== 滚动条暗色奢华样式 ==================== */
+.table-wrapper::-webkit-scrollbar,
+.el-table__body-wrapper::-webkit-scrollbar,
+.el-table__header-wrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-track,
+.el-table__body-wrapper::-webkit-scrollbar-track,
+.el-table__header-wrapper::-webkit-scrollbar-track {
+  background: rgba(10, 10, 10, 0.3);
+  border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb,
+.el-table__body-wrapper::-webkit-scrollbar-thumb,
+.el-table__header-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%);
+  border-radius: 10px;
+  border: 2px solid rgba(10, 10, 10, 0.3);
+  transition: all 0.3s ease;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover,
+.el-table__body-wrapper::-webkit-scrollbar-thumb:hover,
+.el-table__header-wrapper::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.5) 0%, rgba(212, 175, 55, 0.4) 100%);
+  border-color: rgba(10, 10, 10, 0.5);
+}
+
+.table-wrapper::-webkit-scrollbar-corner,
+.el-table__body-wrapper::-webkit-scrollbar-corner,
+.el-table__header-wrapper::-webkit-scrollbar-corner {
+  background: rgba(10, 10, 10, 0.3);
 }
 
 /* 表格样式 */
@@ -801,9 +852,24 @@ onMounted(() => {
   color: #0a0a0a !important;
 }
 
+/* 分页器输入框 - 使用奢华渐变背景 */
 .pagination-wrapper :deep(.el-input__wrapper) {
-  background: rgba(26, 26, 26, 0.6);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.9) 0%, rgba(10, 10, 10, 0.85) 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.3s ease !important;
+}
+
+.pagination-wrapper :deep(.el-input__wrapper:hover),
+.pagination-wrapper :deep(.el-input__wrapper.is-focus) {
+  border-color: rgba(212, 175, 55, 0.6) !important;
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.95) 0%, rgba(10, 10, 10, 0.9) 100%) !important;
+  box-shadow:
+    0 0 0 3px rgba(212, 175, 55, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
 /* ==================== 新增按钮区域 ==================== */
@@ -1204,6 +1270,211 @@ onMounted(() => {
 </style>
 
 <style>
+/* ==================== 全局下拉菜单暗色奢华样式 ==================== */
+/* 覆盖 Element Plus 下拉菜单的默认白色样式 */
+
+.el-select-dropdown {
+  background: linear-gradient(145deg, rgba(15, 15, 15, 0.98) 0%, rgba(5, 5, 5, 0.96)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(212, 175, 55, 0.15),
+    0 0 30px rgba(212, 175, 55, 0.1) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(30px) !important;
+  padding: 8px !important;
+}
+
+/* 下拉菜单外层包装 - 移除白色边框 */
+.el-select-dropdown__list,
+.el-select-dropdown__wrap {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 下拉菜单边框 - 移除默认白色边框 */
+.el-select-dropdown .el-scrollbar__wrap,
+.el-select-dropdown .el-scrollbar__view {
+  background: transparent !important;
+  border: none !important;
+}
+
+.el-select-dropdown .el-select-dropdown__list {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* 下拉选项 */
+.el-select-dropdown__item {
+  color: rgba(244, 228, 188, 0.9) !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  margin: 2px 0 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.3px !important;
+  line-height: 1.5 !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.el-select-dropdown__item:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.12) 100%) !important;
+  color: #f4e4bc !important;
+  transform: translateX(2px);
+}
+
+.el-select-dropdown__item.is-selected {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%) !important;
+  color: #f4e4bc !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.el-select-dropdown__item.is-selected:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.4) 0%, rgba(212, 175, 55, 0.3) 100%) !important;
+  border-color: rgba(212, 175, 55, 0.5) !important;
+}
+
+/* 移除下拉面板的所有白色边框 */
+.el-popper.is-light,
+.el-select-dropdown.is-light {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* 下拉箭头样式 */
+.el-select-dropdown__list .el-select-dropdown__item span {
+  line-height: 1.5 !important;
+}
+
+/* ==================== 分页组件暗色奢华样式 ==================== */
+
+/* 分页器中的选择器 */
+.el-pagination .el-select .el-select__wrapper {
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.9) 0%, rgba(10, 10, 10, 0.85) 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.3s ease !important;
+}
+
+.el-pagination .el-select .el-select__wrapper:hover,
+.el-pagination .el-select .el-select__wrapper.is-focused {
+  border-color: rgba(212, 175, 55, 0.6) !important;
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.95) 0%, rgba(10, 10, 10, 0.9) 100%) !important;
+  box-shadow:
+    0 0 0 3px rgba(212, 175, 55, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 分页器选择器文字颜色 */
+.el-pagination .el-select .el-select__selected-item {
+  color: rgba(244, 228, 188, 0.9) !important;
+}
+
+.el-pagination .el-select .el-select__placeholder {
+  color: rgba(244, 228, 188, 0.35) !important;
+}
+
+/* 分页器选择器图标 */
+.el-pagination .el-select .el-select__caret {
+  color: rgba(212, 175, 55, 0.7) !important;
+}
+
+/* 分页器输入框（jumper 跳转输入框） */
+.el-pagination .el-input .el-input__wrapper {
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.9) 0%, rgba(10, 10, 10, 0.85) 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.3s ease !important;
+}
+
+.el-pagination .el-input .el-input__wrapper:hover,
+.el-pagination .el-input .el-input__wrapper.is-focus {
+  border-color: rgba(212, 175, 55, 0.6) !important;
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.95) 0%, rgba(10, 10, 10, 0.9) 100%) !important;
+  box-shadow:
+    0 0 0 3px rgba(212, 175, 55, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.el-pagination .el-input .el-input__inner {
+  color: rgba(244, 228, 188, 0.9) !important;
+}
+
+.el-pagination .el-input .el-input__inner::placeholder {
+  color: rgba(244, 228, 188, 0.35) !important;
+}
+
+/* ==================== 全局滚动条暗色奢华样式 ==================== */
+
+/* 预览容器滚动条 */
+.preview-container::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.preview-container::-webkit-scrollbar-track {
+  background: rgba(10, 10, 10, 0.3);
+  border-radius: 10px;
+}
+
+.preview-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%);
+  border-radius: 10px;
+  border: 2px solid rgba(10, 10, 10, 0.3);
+  transition: all 0.3s ease;
+}
+
+.preview-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.5) 0%, rgba(212, 175, 55, 0.4) 100%);
+  border-color: rgba(10, 10, 10, 0.5);
+}
+
+.preview-container::-webkit-scrollbar-corner {
+  background: rgba(10, 10, 10, 0.3);
+}
+
+/* 所有滚动区域的通用滚动条样式 */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(10, 10, 10, 0.3);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.2) 100%);
+  border-radius: 10px;
+  border: 2px solid rgba(10, 10, 10, 0.3);
+  transition: all 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.5) 0%, rgba(212, 175, 55, 0.4) 100%);
+  border-color: rgba(10, 10, 10, 0.5);
+}
+
+*::-webkit-scrollbar-corner {
+  background: rgba(10, 10, 10, 0.3);
+}
+
 /* ==================== 全局对话框样式覆盖 ==================== */
 
 /* 强制覆盖 Element Plus 对话框默认白色背景 */

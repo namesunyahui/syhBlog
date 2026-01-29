@@ -50,3 +50,14 @@ export const updateUserStatus = (id: number, status: string) => {
 export const deleteUser = (id: number) => {
   return request.delete(`/admin/users/${id}`)
 }
+
+// 创建用户（管理员功能）
+export const createUser = (data: {
+  username: string
+  nickname: string
+  email: string
+  password: string
+  role: string
+}) => {
+  return request.post('/admin/users', data)
+}

@@ -65,23 +65,24 @@ public class AuthController {
         return Result.success();
     }
 
-    @Operation(summary = "用户注册")
-    @PostMapping("/register")
-    public Result<Map<String, Object>> register(@Valid @RequestBody RegisterRequestDTO registerDTO) {
-        try {
-            // 调用 Service 层注册方法
-            User user = userService.register(registerDTO);
-
-            // 构建返回数据
-            Map<String, Object> data = new HashMap<>();
-            data.put("user", user);
-            data.put("token", "mock-token-" + user.getId()); // TODO: 实际项目中应该使用JWT
-
-            return Result.success("注册成功", data);
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
-    }
+    // 注册功能已禁用，用户只能由管理员在后台创建
+    // @Operation(summary = "用户注册")
+    // @PostMapping("/register")
+    // public Result<Map<String, Object>> register(@Valid @RequestBody RegisterRequestDTO registerDTO) {
+    //     try {
+    //         // 调用 Service 层注册方法
+    //         User user = userService.register(registerDTO);
+    //
+    //         // 构建返回数据
+    //         Map<String, Object> data = new HashMap<>();
+    //         data.put("user", user);
+    //         data.put("token", "mock-token-" + user.getId()); // TODO: 实际项目中应该使用JWT
+    //
+    //         return Result.success("注册成功", data);
+    //     } catch (RuntimeException e) {
+    //         return Result.error(e.getMessage());
+    //     }
+    // }
 
     public static class LoginRequest {
         private String username;

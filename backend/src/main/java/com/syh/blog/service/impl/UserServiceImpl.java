@@ -143,6 +143,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .count() > 0;
     }
 
+    @Override
+    public User createUser(String username, String password, String nickname, String email, String role) {
+        // 检查用户名是否已存在
+        if (existsByUsername(username)) {
+            throw new RuntimeException("用户名已存在");
+        }
+
+        // 检查邮箱是否已存在
+        if (existsByEmail(email)) {
+            throw new RuntimeException("邮箱已被使用");
+        }
+
+        // 验证角色
+        if (!"SUPER_ADMIN".equals(role) && !"ADMIN".equals(role)) {
+            throw new RuntimeException("无效的角色");
+        }
+
+        // 创建新用户
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(BCrypt.hashpw(password));
+        user.setNickname(nickname);
+        user.setEmail(email);
+        user.setRole(role);
+        user.setStatus("ACTIVE");
+
+        save(user);
+
+        // 清除密码后返回
+        user.setPassword(null);
+        return user;
+    }
+
     /**
      * 将 User 实体转换为 UserDTO
      */

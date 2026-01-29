@@ -56,9 +56,6 @@
       </div>
 
       <div class="login-footer">
-        <router-link to="/admin/register" class="register-link">
-          没有账号？去注册 →
-        </router-link>
         <router-link to="/" class="back-link">
           ← 返回首页
         </router-link>

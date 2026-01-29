@@ -19,6 +19,10 @@
             </el-input>
           </div>
           <div class="filter-actions">
+            <el-button class="action-btn secondary" @click="showAddUserDialog">
+              <el-icon><Plus /></el-icon>
+              新增用户
+            </el-button>
             <el-button class="action-btn primary" @click="loadUsers">
               <el-icon><Search /></el-icon>
               搜索
@@ -148,14 +152,54 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 新增用户对话框 -->
+    <el-dialog
+      v-model="addUserDialogVisible"
+      title="新增用户"
+      width="500px"
+      :close-on-click-modal="false"
+      class="form-dialog">
+      <el-form ref="addUserFormRef" :model="addUserForm" :rules="addUserRules" label-width="100px" class="luxury-form">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addUserForm.username" placeholder="请输入用户名" class="luxury-input" />
+        </el-form-item>
+        <el-form-item label="昵称" prop="nickname">
+          <el-input v-model="addUserForm.nickname" placeholder="请输入昵称" class="luxury-input" />
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addUserForm.email" placeholder="请输入邮箱" class="luxury-input" />
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input
+            v-model="addUserForm.password"
+            type="password"
+            placeholder="请输入密码"
+            show-password
+            class="luxury-input" />
+        </el-form-item>
+        <el-form-item label="角色" prop="role">
+          <el-select v-model="addUserForm.role" placeholder="请选择角色" class="luxury-select">
+            <el-option label="管理员" value="ADMIN" />
+            <el-option label="超级管理员" value="SUPER_ADMIN" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button class="dialog-btn secondary" @click="addUserDialogVisible = false">取消</el-button>
+          <el-button class="dialog-btn primary" @click="confirmAddUser">确定</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
-import { getUserList, updateUserRole, updateUserStatus, deleteUser, type User } from '@/api/user'
+import { Search, Plus } from '@element-plus/icons-vue'
+import { getUserList, updateUserRole, updateUserStatus, deleteUser, createUser, type User } from '@/api/user'
 
 const users = ref<User[]>([])
 const loading = ref(false)
@@ -170,6 +214,38 @@ const pagination = reactive({
 const roleDialogVisible = ref(false)
 const currentUser = ref<Partial<User>>({})
 const newRole = ref('')
+
+// 新增用户相关
+const addUserDialogVisible = ref(false)
+const addUserFormRef = ref()
+const addUserForm = reactive({
+  username: '',
+  nickname: '',
+  email: '',
+  password: '',
+  role: 'ADMIN'
+})
+
+const addUserRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' }
+  ],
+  nickname: [
+    { required: true, message: '请输入昵称', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, max: 20, message: '密码长度在 6 到 20 个字符', trigger: 'blur' }
+  ],
+  role: [
+    { required: true, message: '请选择角色', trigger: 'change' }
+  ]
+}
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return '-'
@@ -200,6 +276,32 @@ const loadUsers = async () => {
     ElMessage.error(error.message || '加载用户列表失败')
   } finally {
     loading.value = false
+  }
+}
+
+const showAddUserDialog = () => {
+  // 重置表单
+  Object.assign(addUserForm, {
+    username: '',
+    nickname: '',
+    email: '',
+    password: '',
+    role: 'ADMIN'
+  })
+  addUserDialogVisible.value = true
+}
+
+const confirmAddUser = async () => {
+  try {
+    await addUserFormRef.value.validate()
+    await createUser(addUserForm)
+    ElMessage.success('新增用户成功')
+    addUserDialogVisible.value = false
+    loadUsers()
+  } catch (error: any) {
+    if (error !== false) { // 排除表单验证失败的情况
+      ElMessage.error(error.message || '新增用户失败')
+    }
   }
 }
 

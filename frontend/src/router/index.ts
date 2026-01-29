@@ -49,11 +49,6 @@ const router = createRouter({
       component: () => import('@/views/admin/Login.vue')
     },
     {
-      path: '/admin/register',
-      name: 'adminRegister',
-      component: () => import('@/views/admin/Register.vue')
-    },
-    {
       path: '/admin',
       name: 'admin',
       component: () => import('@/views/admin/Layout.vue'),
@@ -105,7 +100,7 @@ router.beforeEach((to, from, next) => {
   const isLoggedIn = !!token
 
   // 需要登录的路由路径（白名单）
-  const publicRoutes = ['/admin/login', '/admin/register']
+  const publicRoutes = ['/admin/login']
   const isAdminRoute = to.path.startsWith('/admin')
   const isPublicRoute = publicRoutes.includes(to.path)
 
@@ -116,8 +111,8 @@ router.beforeEach((to, from, next) => {
     } else {
       next('/admin/login') // 未登录，重定向到登录页
     }
-  } else if ((to.path === '/admin/login' || to.path === '/admin/register') && isLoggedIn) {
-    // 已登录用户访问登录/注册页，重定向到管理后台
+  } else if (to.path === '/admin/login' && isLoggedIn) {
+    // 已登录用户访问登录页，重定向到管理后台
     next('/admin/dashboard')
   } else {
     // 公开页面，直接放行

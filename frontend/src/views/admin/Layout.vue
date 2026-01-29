@@ -87,7 +87,7 @@ const menuItems = [
   { path: '/admin/articles', label: '文章管理' },
   { path: '/admin/categories', label: '分类管理' },
   { path: '/admin/tags', label: '标签管理' },
-  { path: '/admin/comments', label: '评论管理', badge: '3' },
+  { path: '/admin/comments', label: '评论管理' },
   { path: '/admin/users', label: '用户管理' },
   { path: '/', label: '返回首页' }
 ]

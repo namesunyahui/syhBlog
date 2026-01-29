@@ -91,4 +91,16 @@ public interface UserService extends IService<User> {
      * @return 是否存在
      */
     boolean existsByEmail(String email);
+
+    /**
+     * 创建用户（管理员功能）
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @param nickname 昵称
+     * @param email    邮箱
+     * @param role     角色
+     * @return 创建的用户
+     */
+    User createUser(String username, String password, String nickname, String email, String role);
 }
