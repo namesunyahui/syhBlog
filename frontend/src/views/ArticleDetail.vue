@@ -829,7 +829,6 @@ onMounted(() => {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   cursor: pointer;
-  cursor: none;
   transition: all 0.3s var(--ease-out);
   white-space: nowrap;
 }
@@ -850,7 +849,6 @@ onMounted(() => {
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
   cursor: pointer;
-  cursor: none;
   transition: all 0.3s var(--ease-out);
 }
 
@@ -997,7 +995,6 @@ onMounted(() => {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  cursor: none;
   transition: all 0.3s var(--ease-out);
 }
 

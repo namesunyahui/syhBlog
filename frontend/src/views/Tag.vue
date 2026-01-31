@@ -570,7 +570,6 @@ watch(() => route.query.tag, async (newTag) => {
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   cursor: pointer;
-  cursor: none;
 }
 
 .remove-icon {
@@ -595,7 +594,6 @@ watch(() => route.query.tag, async (newTag) => {
   font-weight: var(--font-medium);
   border-radius: var(--radius-md);
   cursor: pointer;
-  cursor: none;
   transition: all 0.3s var(--ease-out);
 }
 

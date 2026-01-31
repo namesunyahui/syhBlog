@@ -517,7 +517,6 @@ watch(() => route.query.categoryId, (newCategoryId) => {
   font-weight: var(--font-medium);
   border-radius: var(--radius-full);
   cursor: pointer;
-  cursor: none;
   transition: all 0.3s var(--ease-out);
 }
 

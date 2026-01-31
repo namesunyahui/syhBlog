@@ -447,7 +447,7 @@ watch(
   font-weight: var(--font-medium);
   border-radius: var(--radius-full);
   cursor: pointer;
-  cursor: none; /* 使用自定义光标 */
+  cursor: pointer;
   transition: all 0.3s var(--ease-out);
 }
 

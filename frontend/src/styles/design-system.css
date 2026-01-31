@@ -150,8 +150,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  /* 隐藏默认光标，使用自定义光标 */
-  cursor: none;
 }
 
 #app {
@@ -217,7 +215,6 @@ button {
   border: none;
   background: none;
   cursor: pointer;
-  cursor: none; /* 使用自定义光标 */
 }
 
 /* ==================== 输入框重置 ==================== */

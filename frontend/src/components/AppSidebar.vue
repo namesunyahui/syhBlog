@@ -166,7 +166,6 @@ defineEmits<{
   border-radius: var(--radius-lg);
   color: var(--bg-primary);
   cursor: pointer;
-  cursor: none;
   transition: all 0.3s var(--ease-out);
   display: flex;
   align-items: center;
